@@ -1,0 +1,88 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{qrcode}
+\usepackage{booktabs}
+\usepackage{grffile}
+\usepackage[T1]{fontenc}
+\usepackage{tabularx}  % Tablas con columnas ajustables
+\usepackage{booktabs}  % Mejora el formato de las tablas
+\usepackage{array}      % Control preciso de columnas
+\usepackage{ragged2e}   % Justificación de texto
+
+\geometry{a4paper, margin=2cm}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\begin{document}
+
+\centering
+{\LARGE \textbf{Comercializadora LECE Comunicaciones}}
+
+\vspace{1cm}
+
+\begin{minipage}{0.5\textwidth}
+  \raggedright
+  \textbf{Número de reporte:} \\
+  \texttt{@@ID_MOVIMIENTO@@} \\[0.5cm]
+  \textbf{Origen:} \\
+  \texttt{@@ORIGEN@@} \\[0.5cm]
+  \textbf{Destino:} \\
+  \texttt{@@DESTINO@@} \\
+\end{minipage}%
+\begin{minipage}{0.5\textwidth}
+  \raggedleft
+  \includegraphics[width=4cm]{Documents/documentación/Nuevo aspecto.png}
+\end{minipage}
+
+\vspace{1cm}
+
+\textbf{Fecha de movimiento:} \\
+\texttt{\detokenize{@@FECHA@@}} 
+
+\vspace{1cm}
+
+\begin{tabularx}{\textwidth}{@{}| l |Y |r |r| @{}}
+  \hline
+  \textbf{Número de Serie} & \textbf{Descripción} & \textbf{Cantidad} & \textbf{Unidad} \\
+  \hline
+  \midrule
+  @@TABLA_DATOS@@
+  \bottomrule
+  \hline
+\end{tabularx}
+
+\vfill
+
+\begin{minipage}[t]{0.3\textwidth}
+  \centering
+  \rule{6cm}{1pt}\\
+  Firma del transportista
+\end{minipage}%
+\begin{minipage}[t]{0.3\textwidth}
+  \centering
+  \rule{6cm}{1pt}\\
+  Firma del responsable que envía \\
+  @@NOMBRE_USUARIO@@
+\end{minipage}%
+\begin{minipage}[t]{0.3\textwidth}
+  \centering
+  \rule{6cm}{1pt}\\
+  Firma del responsable que recibe
+\end{minipage}
+
+\vspace{2cm}
+
+\begin{minipage}{0.5\textwidth}
+  \centering
+  \qrcode[height=3cm]{@@ID_MOVIMIENTO@@} \\
+  Código QR
+\end{minipage}%
+\begin{minipage}{0.5\textwidth}
+  \centering
+  \includegraphics[width=4cm]{@@BARCODE_PATH@@} \\
+  Código de barras
+\end{minipage}
+
+\end{document}

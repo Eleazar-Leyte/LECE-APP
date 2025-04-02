@@ -1,0 +1,128 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{qrcode}
+\usepackage{booktabs}
+\usepackage{grffile}
+\usepackage[T1]{fontenc}
+\usepackage{tabularx}  % Tablas con columnas ajustables
+\usepackage{booktabs}  % Mejora el formato de las tablas
+\usepackage{array}      % Control preciso de columnas
+\usepackage{ragged2e}   % Justificación de texto
+\usepackage{float}
+\usepackage{multicol}
+\setlength{\columnsep}{1cm}
+\usepackage{wrapfig}
+\usepackage{etoolbox} % Necesario para los toggles
+
+\geometry{a4paper, margin=2cm}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+
+% Definir toggles
+\newtoggle{miscelaneos}
+\newtoggle{ont}
+\newtoggle{modem}
+
+\begin{document}
+\begin{table}[H]
+    \begin{center}
+    \begin{tabular}{m{3cm} m{15cm}}
+    \includegraphics[width=.5\linewidth]{Documents/documentación/Nuevo aspecto.png}
+& {\LARGE \textbf{Comercializadora LECE Comunicaciones}} \\
+    \end{tabular}
+\end{center}
+
+\end{table}
+\begin{multicols}{2}
+[
+\begin{center}
+\section*{Reporte de entrega de Materiales}
+\end{center}
+]
+\vspace{1cm}
+\noindent \textbf{Área:} @@area@@
+
+\noindent \textbf{COPE:} @@Cope@@ 
+\vspace{2 cm}
+
+\noindent \textbf{Técnico asignado:}
+
+@@ExpTec@@
+
+\noindent \textbf{Administrador:}
+
+@@Usuario@@
+
+\columnbreak
+\noindent \textbf{Fecha:}
+
+@@FECHA@@
+\begin{wrapfigure}{l}{0.5\linewidth}
+\includegraphics[width=\linewidth]{@@QRCODE_PATH@@}
+\end{wrapfigure}
+\end{multicols}
+\vspace{1cm}
+% ========== TABLAS CONDICIONALES ==========
+\iftoggle{miscelaneos}{
+    \textbf{Misceláneos entregados:}
+
+    \begin{tabularx}{\textwidth}{|l|r|r|Y|}
+    \hline
+    \textbf{No. Serie} & \textbf{Cantidad} & \textbf{Unidad} & \textbf{Descripción} \\
+    \hline
+    @@MISCELANEOS@@
+    \hline
+    \end{tabularx}
+    \vspace{1cm}
+}{}
+
+\iftoggle{ont}{
+    \textbf{ONT entregados:}
+
+
+    \begin{tabularx}{\textwidth}{|l|r|r|Y|}
+    \hline
+    \textbf{No. Serie} & \textbf{Cantidad} & \textbf{Unidad} & \textbf{Modelo} \\
+    \hline
+    @@ONT@@
+    \hline
+    \end{tabularx}
+    \vspace{1cm}
+}{}
+
+\iftoggle{modem}{
+    \textbf{MODEM entregados:}
+
+    \begin{tabularx}{\textwidth}{|l|r|r|Y|}
+    \hline
+    \textbf{No. Serie} & \textbf{Cantidad} & \textbf{Unidad} & \textbf{Modelo} \\
+    \hline
+    @@MODEM@@
+    \hline
+    \end{tabularx}
+    \vspace{1cm}
+}{}
+% ==========================================
+
+\noindent El técnico @@TECNICO@@ se hace responsable de la entrega de los materiales y equipos que se encuentran en este reporte, así como de su correcto uso y resguardo. 
+
+\noindent El técnico @@TECNICO@@ se compromete a que en caso de ser solicitado devolver los materiales y equipos en el mismo estado en que fueron entregados, salvo el desgaste normal por el uso.
+\vspace{3cm}
+
+\begin{minipage}[t]{0.5\textwidth}
+  \centering
+  \rule{6cm}{1pt}\\
+  \textbf{Nombre del Técnico} \\
+  \texttt{@@TECNICO@@}
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+  \centering
+  \rule{6cm}{1pt}\\
+  \textbf{Administrador} \\
+  \texttt{@@ADMINISTRADOR@@}
+\end{minipage}
+
+\end{document}
