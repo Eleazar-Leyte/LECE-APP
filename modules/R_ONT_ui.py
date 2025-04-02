@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'c:\Users\Eleazar Leyte Zarate\Documents\Work_Space\Nueva_APP\modules\R_MODEM.ui'
+# Form implementation generated from reading ui file 'c:\Users\Eleazar Leyte Zarate\Documents\Work_Space\Nueva_APP\modules\R_ONT.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -16,6 +16,7 @@ class Ui_Registro_de_ONT(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("c:\\Users\\Eleazar Leyte Zarate\\Documents\\Work_Space\\Nueva_APP\\modules\\../assets/icons/Almacen.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         Registro_de_ONT.setWindowIcon(icon)
+        Registro_de_ONT.setToolTipDuration(0)
         Registro_de_ONT.setLayoutDirection(QtCore.Qt.LayoutDirection.LeftToRight)
         Registro_de_ONT.setStyleSheet("QDialog#Registro_de_ONT{\n"
 "background-color: qlineargradient(spread:pad, x1:0.488444, y1:0.392, x2:0.483241, y2:1, stop:0.266917 rgba(1, 59, 61, 255), stop:1 rgba(255, 255, 255, 244));}\n"
@@ -82,6 +83,21 @@ class Ui_Registro_de_ONT(object):
 "font: 12pt \"MS Shell Dlg 2\";")
         self.label_7.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.label_7.setObjectName("label_7")
+        self.btn_regresar = QtWidgets.QPushButton(parent=Registro_de_ONT)
+        self.btn_regresar.setEnabled(True)
+        self.btn_regresar.setGeometry(QtCore.QRect(10, 40, 50, 23))
+        self.btn_regresar.setMinimumSize(QtCore.QSize(50, 23))
+        self.btn_regresar.setMaximumSize(QtCore.QSize(50, 23))
+        self.btn_regresar.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        self.btn_regresar.setStyleSheet("font: 12pt \"MS Shell Dlg 2\";\n"
+"background-color: rgb(255, 0, 0);\n"
+"color:rgb(255, 255, 255);\n"
+"border-radius: 10px;")
+        self.btn_regresar.setText("")
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("c:\\Users\\Eleazar Leyte Zarate\\Documents\\Work_Space\\Nueva_APP\\modules\\../assets/icons/atras bc.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.btn_regresar.setIcon(icon3)
+        self.btn_regresar.setObjectName("btn_regresar")
         self.ln_ns = QtWidgets.QLineEdit(parent=Registro_de_ONT)
         self.ln_ns.setGeometry(QtCore.QRect(160, 150, 150, 23))
         self.ln_ns.setMinimumSize(QtCore.QSize(150, 23))
@@ -91,7 +107,6 @@ class Ui_Registro_de_ONT(object):
 "color: rgb(0, 0, 0);\n"
 "border-radius: 10px;")
         self.ln_ns.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.ln_ns.setCursorMoveStyle(QtCore.Qt.CursorMoveStyle.VisualMoveStyle)
         self.ln_ns.setObjectName("ln_ns")
         self.ln_modelo = QtWidgets.QLineEdit(parent=Registro_de_ONT)
         self.ln_modelo.setGeometry(QtCore.QRect(160, 190, 150, 23))
@@ -118,15 +133,17 @@ class Ui_Registro_de_ONT(object):
         self.btn_imagen.setGeometry(QtCore.QRect(360, 240, 50, 23))
         self.btn_imagen.setMinimumSize(QtCore.QSize(50, 23))
         self.btn_imagen.setMaximumSize(QtCore.QSize(50, 23))
+        self.btn_imagen.setSizeIncrement(QtCore.QSize(0, 0))
         self.btn_imagen.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         self.btn_imagen.setMouseTracking(False)
+        self.btn_imagen.setToolTipDuration(0)
         self.btn_imagen.setStyleSheet("background-color: rgb(1, 59, 61);\n"
 "color: rgb(255, 255, 255);\n"
 "border-radius: 10px;")
         self.btn_imagen.setText("")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("c:\\Users\\Eleazar Leyte Zarate\\Documents\\Work_Space\\Nueva_APP\\modules\\../assets/icons/foto.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        self.btn_imagen.setIcon(icon3)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("c:\\Users\\Eleazar Leyte Zarate\\Documents\\Work_Space\\Nueva_APP\\modules\\../assets/icons/foto.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.btn_imagen.setIcon(icon4)
         self.btn_imagen.setCheckable(False)
         self.btn_imagen.setAutoRepeat(False)
         self.btn_imagen.setAutoExclusive(False)
@@ -154,7 +171,6 @@ class Ui_Registro_de_ONT(object):
 "background-color: rgb(255, 255, 255);\n"
 "color: rgb(0, 0, 0);\n"
 "border-radius: 10px;")
-        self.str_area.setCurrentText("")
         self.str_area.setObjectName("str_area")
         self.horizontalLayout_2.addWidget(self.str_area)
         self.horizontalLayout_3.addLayout(self.horizontalLayout_2)
@@ -180,23 +196,8 @@ class Ui_Registro_de_ONT(object):
         self.str_cope.setObjectName("str_cope")
         self.horizontalLayout.addWidget(self.str_cope)
         self.horizontalLayout_3.addLayout(self.horizontalLayout)
-        self.btn_regresar = QtWidgets.QPushButton(parent=Registro_de_ONT)
-        self.btn_regresar.setEnabled(True)
-        self.btn_regresar.setGeometry(QtCore.QRect(0, 40, 50, 23))
-        self.btn_regresar.setMinimumSize(QtCore.QSize(50, 23))
-        self.btn_regresar.setMaximumSize(QtCore.QSize(50, 23))
-        self.btn_regresar.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.btn_regresar.setStyleSheet("font: 12pt \"MS Shell Dlg 2\";\n"
-"background-color: rgb(255, 0, 0);\n"
-"color:rgb(255, 255, 255);\n"
-"border-radius: 10px;")
-        self.btn_regresar.setText("")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("c:\\Users\\Eleazar Leyte Zarate\\Documents\\Work_Space\\Nueva_APP\\modules\\../assets/icons/atras bc.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        self.btn_regresar.setIcon(icon4)
-        self.btn_regresar.setObjectName("btn_regresar")
         self.layoutWidget1 = QtWidgets.QWidget(parent=Registro_de_ONT)
-        self.layoutWidget1.setGeometry(QtCore.QRect(1, 1, 441, 61))
+        self.layoutWidget1.setGeometry(QtCore.QRect(0, 0, 441, 61))
         self.layoutWidget1.setObjectName("layoutWidget1")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.layoutWidget1)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -228,6 +229,8 @@ class Ui_Registro_de_ONT(object):
         self.label_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label_2.setObjectName("label_2")
         self.verticalLayout.addWidget(self.label_2)
+        self.label_2.raise_()
+        self.Titulo.raise_()
         self.str_exptec = QtWidgets.QComboBox(parent=Registro_de_ONT)
         self.str_exptec.setGeometry(QtCore.QRect(160, 300, 150, 23))
         self.str_exptec.setStyleSheet("font: 12pt \"MS Shell Dlg 2\";\n"
@@ -251,34 +254,34 @@ class Ui_Registro_de_ONT(object):
         self.str_ubicacion.raise_()
         self.btn_imagen.raise_()
         self.layoutWidget.raise_()
-        self.btn_regresar.raise_()
         self.layoutWidget.raise_()
         self.str_exptec.raise_()
+        self.btn_regresar.raise_()
 
         self.retranslateUi(Registro_de_ONT)
         QtCore.QMetaObject.connectSlotsByName(Registro_de_ONT)
 
     def retranslateUi(self, Registro_de_ONT):
         _translate = QtCore.QCoreApplication.translate
-        Registro_de_ONT.setWindowTitle(_translate("Registro_de_ONT", "Registro de MODEM"))
+        Registro_de_ONT.setWindowTitle(_translate("Registro_de_ONT", "Registro de ONT"))
         self.btn_codebar.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Leer etiqueta</p></body></html>"))
-        self.btn_guardar.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Guardar</p></body></html>"))
+        self.btn_guardar.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Guardar ONT</p></body></html>"))
         self.label.setText(_translate("Registro_de_ONT", "Número se Serie:"))
         self.label_3.setText(_translate("Registro_de_ONT", "Modelo:"))
         self.label_6.setText(_translate("Registro_de_ONT", "Ubicación:"))
         self.label_7.setText(_translate("Registro_de_ONT", "Expediente Técnico:"))
+        self.btn_regresar.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Regresar</p></body></html>"))
         self.ln_ns.setPlaceholderText(_translate("Registro_de_ONT", "Número de Serie"))
-        self.ln_modelo.setPlaceholderText(_translate("Registro_de_ONT", "Ingresar Modelo "))
+        self.ln_modelo.setPlaceholderText(_translate("Registro_de_ONT", "Ingresar Modelo"))
         self.str_ubicacion.setItemText(0, _translate("Registro_de_ONT", "Almacén"))
         self.str_ubicacion.setItemText(1, _translate("Registro_de_ONT", "En campo"))
-        self.btn_imagen.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">importar etiqueta</p></body></html>"))
+        self.btn_imagen.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Importar etiqueta</p></body></html>"))
         self.label_4.setText(_translate("Registro_de_ONT", "Área:"))
         self.str_area.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Seleccionar Área</p></body></html>"))
         self.label_5.setText(_translate("Registro_de_ONT", "Copé:"))
-        self.str_cope.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p>Seleccionar Copé</p></body></html>"))
-        self.btn_regresar.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Regresar</p></body></html>"))
+        self.str_cope.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Seleccionar Copé</p></body></html>"))
         self.Titulo.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\"><br/></p></body></html>"))
         self.Titulo.setWhatsThis(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Comercilazadora LECE Comunicaciones</p></body></html>"))
         self.Titulo.setText(_translate("Registro_de_ONT", "Comercilazadora LECE Comunicaciones"))
-        self.label_2.setText(_translate("Registro_de_ONT", "Registro de MODEM"))
+        self.label_2.setText(_translate("Registro_de_ONT", "Registro de O.N.T."))
         self.str_exptec.setToolTip(_translate("Registro_de_ONT", "<html><head/><body><p align=\"center\">Seleccionar Expediente Técnico</p></body></html>"))
