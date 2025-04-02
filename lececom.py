@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QApplication
-from modules.login import Login
+from modules.login.login import Login
 
 
 class Constructora():
