@@ -67,22 +67,43 @@ class TableManager:
         "Producción F.O.": [
             "Folio Pisa",
             "Número de Teléfono",
-            "Tipo de Tarea"
+            "Tipo de Tarea",
             "Metros",
             "Número de Serie",
             "Modelo",
+            "Fecha de Posteo",
             "Imagen"
         ],
         "Producción Cobre": [
             "Folio Pisa",
             "Número de Teléfono",
-            "Tipo de Tarea"
+            "Tipo de Tarea",
             "Metros",
-            "Fecha de Posteó",
             "Número de Serie",
             "Modelo",
+            "Fecha de Posteó",
             "Imagen"
         ],
+        "Producción Quejas": [
+            "Folio Pisa",
+            "Número de Teléfono",
+            "Tipo de Tarea",
+            "Metros",
+            "Número de Serie",
+            "Modelo",
+            "Fecha de Posteó",
+            "Imagen"
+        ],
+        "Producción A4": [
+            "Folio Pisa",
+            "Número de Teléfono",
+            "Tipo de Tarea",
+            "Metros",
+            "Número de Serie",
+            "Modelo",
+            "Fecha de Posteó",
+            "Imagen"
+        ]
         # Agrega más tablas según sea necesario
     }
 
@@ -189,11 +210,42 @@ class TableManager:
         },
         "Producción F.O.": {
             "Folio Pisa": "folio_pisa",
-            "Número de Teléfono": "fecha_posteo",
-            "Tipo de Tarea": "tipo_tares",
+            "Número de Teléfono": "telefono_asignado",
+            "Tipo de Tarea": "tipo_tarea",
             "Metros": "cantidad_mts",
             "Número de Serie": "numero_de_serie",
             "Modelo": "modelo_ont",
+            "Fecha de Posteo": "fecha_posteo",
+            "Imagen": "imagen"
+        },
+        "Producción Cobre": {
+            "Folio Pisa": "folio_pisa",
+            "Número de Teléfono": "telefono_asignado",
+            "Tipo de Tarea": "tipo_tarea",
+            "Metros": "cantidad_mts",
+            "Número de Serie": "numero_de_serie",
+            "Modelo": "modelo_modem",
+            "Fecha de Posteo": "fecha_posteo",
+            "Imagen": "imagen"
+        },
+        "Producción Quejas": {
+            "Folio Pisa": "folio_pisa",
+            "Número de Teléfono": "telefono_asignado",
+            "Tipo de Tarea": "tipo_tarea",
+            "Metros": "cantidad_mts",
+            "Número de Serie": "numero_de_serie",
+            "Modelo": "modelo_ont",
+            "Fecha de Posteo": "fecha_posteo",
+            "Imagen": "imagen"
+        },
+        "Producción A4": {
+            "Folio Pisa": "folio_pisa",
+            "Número de Teléfono": "telefono_asignado",
+            "Tipo de Tarea": "tipo_tarea",
+            "Metros": "cantidad_mts",
+            "Número de Serie": "numero_de_serie",
+            "Modelo": "modelo_ont",
+            "Fecha de Posteo": "fecha_posteo",
             "Imagen": "imagen"
         },
         # Agrega más tablas según sea necesario
