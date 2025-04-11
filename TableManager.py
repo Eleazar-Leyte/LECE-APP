@@ -223,7 +223,7 @@ class TableManager:
             "Número de Teléfono": "telefono_asignado",
             "Tipo de Tarea": "tipo_tarea",
             "Metros": "cantidad_mts",
-            "Número de Serie": "numero_de_serie",
+            "Número de Serie": "numero_serie",
             "Modelo": "modelo_modem",
             "Fecha de Posteo": "fecha_posteo",
             "Imagen": "imagen"
@@ -233,7 +233,7 @@ class TableManager:
             "Número de Teléfono": "telefono_asignado",
             "Tipo de Tarea": "tipo_tarea",
             "Metros": "cantidad_mts",
-            "Número de Serie": "numero_de_serie",
+            "Número de Serie": "numero_serie",
             "Modelo": "modelo_ont",
             "Fecha de Posteo": "fecha_posteo",
             "Imagen": "imagen"
@@ -243,7 +243,7 @@ class TableManager:
             "Número de Teléfono": "telefono_asignado",
             "Tipo de Tarea": "tipo_tarea",
             "Metros": "cantidad_mts",
-            "Número de Serie": "numero_de_serie",
+            "Número de Serie": "numero_serie",
             "Modelo": "modelo_ont",
             "Fecha de Posteo": "fecha_posteo",
             "Imagen": "imagen"

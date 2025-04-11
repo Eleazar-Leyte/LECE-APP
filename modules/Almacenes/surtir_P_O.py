@@ -741,13 +741,13 @@ class Surtir_P_O():
 
         if material['tipo'] == 'ONT':
             modelo = escape_latex(material['modelo'])
-            return f"{escaped_serie} & {escaped_cantidad} & {escaped_unidad} & {modelo} \\\\ \hline"
+            return f"{escaped_serie} & {escaped_cantidad} & {escaped_unidad} & {modelo} \\\\"
         elif material['tipo'] == 'MODEM':
             modelo = escape_latex(material['modelo'])
-            return f"{escaped_serie} & {escaped_cantidad} & {escaped_unidad} & {modelo} \\\\ \hline"
+            return f"{escaped_serie} & {escaped_cantidad} & {escaped_unidad} & {modelo} \\\\"
         else:
             descripcion = escape_latex(material['descripcion'])
-            return f"{escaped_serie} & {escaped_cantidad} & {escaped_unidad} & {descripcion} \\\\ \hline"
+            return f"{escaped_serie} & {escaped_cantidad} & {escaped_unidad} & {descripcion} \\\\"
 
     def on_reporte_generado(self, id_entrega, pdf_path):
         """Manejador de la señal finished: recibe id_movimiento y pdf_path"""

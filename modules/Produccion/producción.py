@@ -1,7 +1,8 @@
+from functools import partial
 from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QUrl
 from PyQt6 import uic, QtWidgets, QtCore, QtGui
-from psycopg2 import Binary
+from psycopg2 import Binary, sql
 from datetime import datetime
 import os
 import uuid
@@ -43,6 +44,7 @@ class Producción():
         self.produccion.btn_a4.clicked.connect(lambda: self.cambiar_vista(3))
         self.produccion.btn_agregar.clicked.connect(self.agregar_fila)
         self.produccion.btn_eliminar.clicked.connect(self.eliminar_fila)
+        self.produccion.btn_guardar.clicked.connect(self.guardar_produccion)
 
     def regresar(self):
         from modules.menu_admin import MenuAdmin
@@ -273,34 +275,36 @@ class Producción():
         return mapeo_tablas.get(indice, self.produccion.tabla_FO)
 
     def _agregar_fila(self, tabla):
-        """Implementación base para agregar filas"""
-        tabla.blockSignals(
-            True)  # Bloquear señales para evitar bucles infinitos
+        """
+        Implementación base para agregar filas
+        """
+        tabla.blockSignals(True)  # Bloquear señales para evitar bucles
         try:
-            fila = tabla.rowCount()
-            tabla.insertRow(fila)
+            row = tabla.rowCount()  # Obtener nueva posición de fila
+            tabla.insertRow(row)
+
+            # Crear e inicializar items para todas las columnas
             for col in range(tabla.columnCount()):
-                item = QtWidgets.QTableWidgetItem()
-                if col == 7:  # Columnas editables
-                    item.setFlags(Qt.ItemFlag.ItemIsEnabled |
-                                  Qt.ItemFlag.ItemIsSelectable)
-                else:
+                if tabla.item(row, col) is None:
+                    item = QTableWidgetItem("")
                     item.setFlags(Qt.ItemFlag.ItemIsEnabled |
                                   Qt.ItemFlag.ItemIsEditable)
-                tabla.setItem(fila, col, item)
+                    tabla.setItem(row, col, item)
         finally:
             tabla.blockSignals(False)
-
-        self.actualizar_estado_combo()  # Actualizar estado de los ComboBoxes
+        self.actualizar_estado_combo()
 
     def _eliminar_fila(self, tabla, row=None):
         """Implementación base para eliminar filas"""
         if row is None:
             row = tabla.currentRow()
         if row != -1:
-            tabla.removeRow(row)
-
-        self.actualizar_estado_combo()  # Actualizar estado de los ComboBoxes
+            tabla.blockSignals(True)
+            try:
+                tabla.removeRow(row)
+            finally:
+                tabla.blockSignals(False)
+        self.actualizar_estado_combo()
 
     def obtener_total_filas(self) -> int:
         """
@@ -373,8 +377,7 @@ class Producción():
             # Obtener parámetros de filtrado
             area = self.produccion.str_area.currentText().strip()
             cope = self.produccion.str_cope.currentText().strip()
-            nombre_tecnico = self.produccion.str_exptec.currentText().strip()  # ID del técnico
-            print(f"ID Técnico: {nombre_tecnico}")
+            nombre_tecnico = self.produccion.str_exptec.currentText().strip()
 
             if not all([area, cope, nombre_tecnico]):
                 raise ValueError(
@@ -382,15 +385,52 @@ class Producción():
 
             # Determinar tabla y columnas según el tipo de equipo
             if tipo_equipo == "ONT":
-                tabla = "\"ONT en Campo\""
-                columna_serie = "\"Numero de Serie\""
+                return self._consultar_en_tabla(
+                    tabla="\"ONT en Campo\"",
+                    columna_serie="\"Numero de Serie\"",
+                    numero_serie=numero_serie,
+                    area=area,
+                    cope=cope,
+                    tecnico=nombre_tecnico
+                )
             elif tipo_equipo == "MODEM":
-                tabla = "modem_en_campo"
-                columna_serie = "\"Numero de Serie\""
+                return self._consultar_en_tabla(
+                    tabla="modem_en_campo",
+                    columna_serie="\"Numero de Serie\"",
+                    numero_serie=numero_serie,
+                    area=area,
+                    cope=cope,
+                    tecnico=nombre_tecnico
+                )
+            elif tipo_equipo == "QUEJAS":
+                # Busca primero en ONT y despues en MODEM
+                return (self._consultar_en_tabla("\"ONT en Campo\"", "\"Numero de Serie\"",
+                                                 numero_serie, area, cope, nombre_tecnico) or
+                        self._consultar_en_tabla(
+                    "modem_en_campo", "\"Numero de Serie\"", numero_serie, area, cope, nombre_tecnico)
+                )
+            elif tipo_equipo == "A4":
+                return self._consultar_en_tabla(
+                    tabla="modem_en_campo",
+                    columna_serie="\"Numero de Serie\"",
+                    numero_serie=numero_serie,
+                    area=area,
+                    cope=cope,
+                    tecnico=nombre_tecnico
+                )
             else:
                 raise ValueError("Tipo de equipo no válido")
 
-            query = f"""
+        except Exception as e:
+            raise RuntimeError(f"Error al consultar {tipo_equipo}: {str(e)}")
+
+    def _consultar_en_tabla(self, tabla: str, columna_serie: str, numero_serie: str, area: str, cope: str, tecnico: str) -> dict:
+        """
+        Función auxiliar para consultar un equipo en su tabla correspondiente
+        filtrando por número de serie, área, COPE y técnico.
+        """
+
+        query = f"""
                 SELECT modelo, imagen, "Fecha de Registro" 
                 FROM {tabla}
                 WHERE 
@@ -399,13 +439,10 @@ class Producción():
                     "Centro de Trabajo" = %s AND
                     "Expediente Técnico" = %s
             """
-            params = (numero_serie, area, cope, nombre_tecnico)
+        params = (numero_serie, area, cope, tecnico)
 
-            resultado = self.db_almacen.execute_query(query, params)
-            return resultado[0] if resultado else None
-
-        except Exception as e:
-            raise RuntimeError(f"Error al consultar {tipo_equipo}: {str(e)}")
+        resultado = self.db_almacen.execute_query(query, params)
+        return resultado[0] if resultado else None
 
     def validar_numero_serie(self, row: int, col: int, tipo_equipo: str):
         """Valida el número de serie y completa datos automáticamente con filtros"""
@@ -418,6 +455,20 @@ class Producción():
         try:
             if not numero_serie:
                 raise ValueError("Ingrese un número de serie")
+
+            # Mapeo dinámico de tablas
+            tabla_bd = {
+                "ONT": "fibra_optica",
+                "MODEM": "cobre",
+                "QUEJAS": "quejas",
+                "A4": "a4_incentivos"
+            }.get(tipo_equipo, "fibra_optica")
+
+            # Verificar unicidad
+            folio = tabla.item(row, 0).text().strip()
+            if self.folio_o_serie_existen(folio, numero_serie,  tabla_bd):
+                raise ValueError(
+                    f"Folio/serie ya existen en {tabla_bd.replace('_', ' ')}")
 
             # Consultar equipo con filtros de área, COPE y técnico
             datos = self.consultar_equipo_en_campo(numero_serie, tipo_equipo)
@@ -450,105 +501,268 @@ class Producción():
             QMessageBox.warning(self.produccion, "Error", str(e))
 
     def conectar_validaciones(self):
-        """Conectar señales de cambio para cada tipo de tabla"""
-        # Fibra Óptica (ONT)
-        self.produccion.tabla_FO.cellChanged.connect(
-            lambda row, col: self.validar_numero_serie(row, col, "ONT")
-        )
+        """Conectar todas las validaciones a las columnas correspondientes"""
+        # Conexión para todas las tablas
+        tablas = [
+            (self.produccion.tabla_FO, "ONT"),
+            (self.produccion.tabla_cobre, "MODEM"),
+            (self.produccion.tabla_quejas, "QUEJAS"),
+            (self.produccion.tabla_a4, "A4")
+        ]
 
-        # Cobre (MODEM)
-        self.produccion.tabla_cobre.cellChanged.connect(
-            lambda row, col: self.validar_numero_serie(row, col, "MODEM")
-        )
+        for tabla, tipo in tablas:
+            tabla.cellChanged.connect(
+                lambda row, col, t=tabla, tt=tipo: self._validar_fila_completa(
+                    row, col, t, tt)
+            )
 
-        # Quejas (Consulta en ambas tablas)
-        self.produccion.tabla_quejas.cellChanged.connect(
-            self.validar_queja
-        )
-        self.produccion.tabla_a4.cellChanged.connect(
-            lambda row, col: self.validar_numero_serie(row, col, "MODEM")
-        )
-
-    def validar_queja(self, row: int, col: int):
-        """Validación especial para Quejas (consulta ONT y MODEM)"""
-        if col != 4:
-            return
-
-        tabla = self.produccion.tabla_quejas
-        numero_serie = tabla.item(row, col).text().strip()
-
+    def _validar_fila_completa(self, row: int, col: int, tabla, tipo: str):
+        """
+        Aplica todas las validaciones para cada edición de celda
+        """
         try:
-            if not numero_serie:
-                raise ValueError("Ingrese un número de serie")
+            if row >= tabla.rowCount():
+                return
 
-            # Consultar equipo con filtros de área, COPE y técnico
-            datos_ont = self.consultar_equipo_en_campo(numero_serie, "ONT")
-            datos_modem = self.consultar_equipo_en_campo(numero_serie, "MODEM")
+            # Validar teléfono (columna 1)
+            if col == 1:
+                telefono = tabla.item(row, col).text()
+                if not self.validar_telefono(telefono):
+                    raise ValueError(
+                        "Teléfono debe tener 10 dígitos numéricos")
 
-            if not datos_ont and not datos_modem:
-                raise ValueError(
-                    "Número de serie no encontrado en ONT ni MODEM"
-                )
+            # Formatear tipo de tarea (columna 2)
+            elif col == 2:
+                item = tabla.item(row, col)
+                item.setText(self.formatear_tipo_tarea(item.text()))
 
-            # ---- Llenar datos automáticamente ----
-            # Columna 5: Modelo (ONT o MODEM)
-            modelo_item = QTableWidgetItem(
-                datos_ont["modelo"] if datos_ont else datos_modem["modelo"])
-            modelo_item.setFlags(Qt.ItemFlag.ItemIsEnabled)  # Solo lectura
-            tabla.setItem(row, 5, modelo_item)
+            # Validar número de serie (columna 4)
+            elif col == 4 and tipo in ["ONT", "MODEM", "QUEJAS", "A4"]:
+                self.validar_numero_serie(row, col, tipo)
 
-            # Columna 7: Imagen (ONT o MODEM)
-            imagen = datos_ont["imagen"] if datos_ont else datos_modem["imagen"]
-            if imagen:
-                label = QtWidgets.QLabel()
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(imagen.tobytes())
-                label.setPixmap(pixmap.scaled(
-                    80, 80, Qt.AspectRatioMode.KeepAspectRatio))
-                tabla.setCellWidget(row, 7, label)
-            else:
-                tabla.setItem(row, 7, QTableWidgetItem("Sin imagen"))
+            if col in (0, 4):
+                if self.verificar_duplicados_tabla(tabla, row, 0, 4):
+                    raise ValueError(
+                        "Folio/Serie duplicados en la tabla.")
+
         except Exception as e:
-            QMessageBox.warning(self.produccion, "Error", str(e))
-            self._eliminar_fila(tabla, row)
+            QMessageBox.warning(self.produccion, "Error de validación", str(e))
+            tabla.item(row, col).setText("")
 
-    def validar_a4(self, row: int, col: int):
-        """Validación especial para A4 (consulta en ambas tablas)"""
-        if col != 4:
-            return
-
-        tabla = self.produccion.tabla_a4
-        numero_serie = tabla.item(row, col).text().strip()
-
+    def guardar_produccion(self):
+        """
+        Guardar los datos de todas las tablas en la base de datos
+        """
         try:
-            if not numero_serie:
-                raise ValueError("Ingrese un número de serie")
+            # Obtener filas de los ComboBox
+            area = self.produccion.str_area.currentText().strip()
+            cope = self.produccion.str_cope.currentText().strip()
+            exp_tecnico = self.produccion.str_exptec.currentText().strip()
 
-            # Consultar equipo con filtros de área, COPE y técnico
-            datos = self.consultar_equipo_en_campo(numero_serie, "MODEM")
-
-            if not datos:
+            if not all([area, cope, exp_tecnico]):
                 raise ValueError(
-                    "MODEM no encontrado o no asignado a este Técnico"
-                )
+                    "Complete todos los filtros (Área, COPE y Técnico)")
 
-            # ---- Llenar datos automáticamente ----
-            # Columna 5: Modelo (MODEM)
-            modelo_item = QTableWidgetItem(QTableWidgetItem(datos["modelo"]))
-            modelo_item.setFlags(Qt.ItemFlag.ItemIsEnabled)  # Solo lectura
-            tabla.setItem(row, 5, modelo_item)
-
-            # Columna 7: Imagen (ONT o MODEM)
-            imagen = datos["imagen"]
-            if imagen:
-                label = QtWidgets.QLabel()
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(imagen.tobytes())
-                label.setPixmap(pixmap.scaled(
-                    80, 80, Qt.AspectRatioMode.KeepAspectRatio))
-                tabla.setCellWidget(row, 7, label)
-            else:
-                tabla.setItem(row, 7, QTableWidgetItem("Sin imagen"))
+            tablas = [
+                (self.produccion.tabla_FO, "fibra_optica"),
+                (self.produccion.tabla_cobre, "cobre"),
+                (self.produccion.tabla_quejas, "quejas"),
+                (self.produccion.tabla_a4, "a4_incentivos")
+            ]
+            errores = []
+            for tabla, nombre_bd in tablas:
+                try:
+                    if tabla.rowCount() > 0:
+                        self._guardar_tabla(
+                            tabla, nombre_bd, area, cope, exp_tecnico)
+                except Exception as e:
+                    errores.append(f"Error en {nombre_bd}: {str(e)}")
+            if not errores:
+                QMessageBox.information(
+                    self.produccion, "Éxito", f"La producción del técnico {exp_tecnico} se guardo correctamente")
+            self.limpiar_tablas()
         except Exception as e:
-            QMessageBox.warning(self.produccion, "Error", str(e))
-            self._eliminar_fila(tabla, row)
+            QMessageBox.critical(self.produccion, "Error",
+                                 f"Error al guardar: {str(e)}")
+
+    def _guardar_tabla(self, tabla, nombre_tabla: str, area: str, cope: str, exp_tecnico: str):
+        """
+        Guardar información con implementaciones de seguridad de SQL y una estructura dinámica.
+        """
+        mapeo_columnas = {
+            "fibra_optica": {
+                0: "folio_pisa",
+                1: "telefono_asignado",
+                2: "tipo_tarea",
+                3: "cantidad_mts",
+                4: "numero_de_serie",
+                5: "modelo_ont",
+                6: "fecha_posteo",
+                7: "imagen"
+            },
+            "cobre": {
+                0: "folio_pisa",
+                1: "telefono_asignado",
+                2: "tipo_tarea",
+                3: "cantidad_mts",
+                4: "numero_serie",
+                5: "modelo_modem",
+                6: "fecha_posteo",
+                7: "imagen"
+            },
+            "quejas": {
+                0: "folio_pisa",
+                1: "telefono_asignado",
+                2: "tipo_tarea",
+                3: "cantidad_mts",
+                4: "numero_serie",
+                5: "modelo",
+                6: "fecha_posteo",
+                7: "imagen"
+            },
+            "a4_incentivos": {
+                0: "folio_pisa",
+                1: "telefono_asignado",
+                2: "tipo_tarea",
+                3: "cantidad_mts",
+                4: "numero_serie",
+                5: "modelo_modem",
+                6: "fecha_posteo",
+                7: "imagen"
+            },
+        }
+        for fila in range(tabla.rowCount()):
+            try:
+                datos = {}
+                for col in mapeo_columnas[nombre_tabla].keys():
+                    item = tabla.item(fila, col)
+                    # Manejar celdas vacías
+                    valor = item.text().strip() if item else ""
+                    datos[mapeo_columnas[nombre_tabla][col]] = valor
+
+                # Manejar imagen
+                imagen_widget = tabla.cellWidget(fila, 7)
+                datos["imagen"] = self._obtener_imagen_bytes(imagen_widget)
+
+                # Añadir campos comunes
+                datos.update({
+                    "exp_tecnico": exp_tecnico,
+                    "area": area,
+                    "cope": cope
+                })
+
+                # Validar teléfono solo si es obligatorio
+                if nombre_tabla == "fibra_optica":
+                    if not self.validar_telefono(datos["telefono_asignado"]):
+                        raise ValueError(f"Teléfono inválido en fila {fila+1}")
+
+                # Validar duplicados
+                serie = datos.get("numero_de_serie") or datos.get(
+                    "numero_serie")
+                if self.folio_o_serie_existen(datos["folio_pisa"], serie, nombre_tabla):
+                    raise ValueError(
+                        f"Folio/Serie ya existen en {nombre_tabla}")
+
+                # Construir query
+                columns = [sql.Identifier(k) for k in datos.keys()]
+                values = [sql.Placeholder() for _ in datos.values()]
+                query = sql.SQL("INSERT INTO {table} ({fields}) VALUES ({values})").format(
+                    table=sql.Identifier(nombre_tabla),
+                    fields=sql.SQL(', ').join(columns),
+                    values=sql.SQL(', ').join(values)
+                )
+                self.db_produccion.execute_query(
+                    query, tuple(datos.values()), fetch=False)
+
+            except Exception as e:
+                raise RuntimeError(f"Fila {fila+1}: {str(e)}")
+
+    def _obtener_imagen_bytes(self, widget: QtWidgets.QLabel) -> bytes:
+        """
+        Convierte una imagen de un QLabel a bytes para almacenar en la base de datos
+        """
+        if widget and widget.pixmap():
+            pixmap = widget.pixmap()
+            buffer = QtCore.QBuffer()
+            buffer.open(QtCore.QBuffer.OpenModeFlag.ReadWrite)
+            pixmap.save(buffer, "PNG")
+            return Binary(buffer.data())
+        return None
+
+    def limpiar_tablas(self):
+        """
+        Limpia todas las tablas y restablece los ComboBoxes
+        """
+        for tabla in [self.produccion.tabla_FO, self.produccion.tabla_cobre,
+                      self.produccion.tabla_quejas, self.produccion.tabla_a4]:
+            tabla.setRowCount(0)
+        self.actualizar_estado_combo()
+
+    def validar_telefono(self, telefono: str) -> bool:
+        """Valida que el teléfono tenga 10 dígitos numéricos."""
+        return telefono.isdigit() and len(telefono) == 10
+
+    def folio_o_serie_existen(self, folio: str, serie: str, tabla_bd: str) -> bool:
+        """
+        Verifica si el folio o serie ya existen en la base de datos.
+        """
+        tablas_verificar = {
+            "fibra_optica": ["fibra_optica", "quejas", "a4_incentivos"],
+            "cobre": ["cobre", "a4_incentivos", "quejas"],
+            # Verifica en ONT, MODEM y Quejas
+            "quejas": ["fibra_optica", "cobre", "quejas"],
+            "a4_incentivos": ["a4_incentivos", "fibra_optica", "cobre", "quejas"]
+        }.get(tabla_bd, [])
+
+        for tabla in tablas_verificar:
+            col_serie = "numero_de_serie" if tabla == "fibra_optica" else "numero_serie"
+            query = f"""
+                SELECT EXISTS (
+                    SELECT 1 FROM {tabla}
+                    WHERE folio_pisa = %s OR {col_serie} = %s
+                )
+            """
+            resultado = self.db_produccion.execute_query(query, (folio, serie))
+            if resultado[0]['exists']:
+                return True
+        return False
+
+    def formatear_tipo_tarea(self, texto: str) -> str:
+        """Convierte el texto a mayúsculas y elimina caracteres no permitidos."""
+        # Permite letras, números y guiones
+        texto_limpio = ''.join(c for c in texto.upper()
+                               if c.isalnum() or c in ('-', '_'))
+        return texto_limpio
+
+    def verificar_duplicados_tabla(self, tabla, fila_actual: int, col_folio: int, col_serie: int) -> bool:
+        """Verifica si el folio/serie ya existen en otras filas de la tabla"""
+        # Verificar si la fila actual existe
+        if fila_actual >= tabla.rowCount():
+            return False
+
+        # Obtener items de folio y serie
+        folio_item = tabla.item(fila_actual, col_folio)
+        serie_item = tabla.item(fila_actual, col_serie)
+
+        # Si alguno de los items no existe, retornar False
+        if not folio_item or not serie_item:
+            return False
+
+        folio = folio_item.text().strip()
+        serie = serie_item.text().strip()
+
+        for fila in range(tabla.rowCount()):
+            if fila == fila_actual:
+                continue
+            # Obtener items de otras filas
+            folio_existente_item = tabla.item(fila, col_folio)
+            serie_existente_item = tabla.item(fila, col_serie)
+
+            folio_existente = folio_existente_item.text(
+            ).strip() if folio_existente_item else ""
+            serie_existente = serie_existente_item.text(
+            ).strip() if serie_existente_item else ""
+
+            if folio_existente == folio or serie_existente == serie:
+                return True
+        return False
