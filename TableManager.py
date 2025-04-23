@@ -31,78 +31,39 @@ class TableManager:
             "Área", "COPE", "N.S.S.", "R.F.C.", "Dirección"
         ],
         "M_Almacen": [
-            "Número de serie",
-            "Cantidad disponible",
-            "Unidad",
-            "Descripción",
-            "Tipo",
+            "Número de serie", "Cantidad disponible", "Unidad", "Descripción", "Tipo",
             "Cantidad a enviar"
         ],
         "Reportes": [
-            "Id Movimiento",
-            "Origen",
-            "Destino",
-            "Fecha de Movimiento",
-            "Estatus",
+            "Id Movimiento", "Origen", "Destino", "Fecha de Movimiento", "Estatus",
             "Reporte"
         ],
         "Asignacion_PO": [
-            "Número de Serie",
-            "Cantidad",
-            "Unidad",
-            "Modelo",
-            "Imagen",
-            "Tipo",
-            "Fecha",
+            "Número de Serie", "Cantidad", "Unidad", "Modelo", "Imagen", "Tipo", "Fecha",
             "Cantidad a Entregar"
         ],
         "Entregas": [
-            "Id entrega",
-            "Area",
-            "COPE",
-            "Expediente técnico",
-            "Fecha de entrega",
+            "Id entrega", "Area", "COPE", "Expediente técnico", "Fecha de entrega",
             "Reporte"
         ],
         "Producción F.O.": [
-            "Folio Pisa",
-            "Número de Teléfono",
-            "Tipo de Tarea",
-            "Metros",
-            "Número de Serie",
-            "Modelo",
-            "Fecha de Posteo",
-            "Imagen"
+            "Folio Pisa", "Número de Teléfono", "Tipo de Tarea", "Metros", "Número de Serie",
+            "Modelo", "Fecha de Posteo", "Imagen"
         ],
         "Producción Cobre": [
-            "Folio Pisa",
-            "Número de Teléfono",
-            "Tipo de Tarea",
-            "Metros",
-            "Número de Serie",
-            "Modelo",
-            "Fecha de Posteó",
-            "Imagen"
+            "Folio Pisa", "Número de Teléfono", "Tipo de Tarea", "Metros", "Número de Serie",
+            "Modelo", "Fecha de Posteó", "Imagen"
         ],
         "Producción Quejas": [
-            "Folio Pisa",
-            "Número de Teléfono",
-            "Tipo de Tarea",
-            "Metros",
-            "Número de Serie",
-            "Modelo",
-            "Fecha de Posteó",
-            "Imagen"
+            "Folio Pisa", "Número de Teléfono", "Tipo de Tarea", "Metros", "Número de Serie",
+            "Modelo", "Fecha de Posteó", "Imagen"
         ],
         "Producción A4": [
-            "Folio Pisa",
-            "Número de Teléfono",
-            "Tipo de Tarea",
-            "Metros",
-            "Número de Serie",
-            "Modelo",
-            "Fecha de Posteó",
-            "Imagen"
+            "Folio Pisa", "Número de Teléfono", "Tipo de Tarea", "Metros", "Número de Serie",
+            "Modelo", "Fecha de Posteó", "Imagen"
+        ],
+        "Consumo": [
+            "Número de Serie", "Materiales", "Tipo", "Asignado", "Consumido", "Diferencia"
         ]
         # Agrega más tablas según sea necesario
     }
@@ -248,6 +209,14 @@ class TableManager:
             "Fecha de Posteo": "fecha_posteo",
             "Imagen": "imagen"
         },
+        "Consumo": {
+            "Número de Serie": "Número de Serie",
+            "Materiales": "Materiales",
+            "Tipo": "Tipo",
+            "Asignado": "Asignado",
+            "Consumido": "Consumido",
+            "Diferencia": "Diferencia"
+        }
         # Agrega más tablas según sea necesario
     }
 

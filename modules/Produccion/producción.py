@@ -595,7 +595,7 @@ class Producción():
                 1: "telefono_asignado",
                 2: "tipo_tarea",
                 3: "cantidad_mts",
-                4: "numero_de_serie",
+                4: "numero_serie",
                 5: "modelo_ont",
                 6: "fecha_posteo",
                 7: "imagen"
@@ -657,7 +657,7 @@ class Producción():
                         raise ValueError(f"Teléfono inválido en fila {fila+1}")
 
                 # Validar duplicados
-                serie = datos.get("numero_de_serie") or datos.get(
+                serie = datos.get("numero_serie") or datos.get(
                     "numero_serie")
                 if self.folio_o_serie_existen(datos["folio_pisa"], serie, nombre_tabla):
                     raise ValueError(
@@ -715,7 +715,7 @@ class Producción():
         }.get(tabla_bd, [])
 
         for tabla in tablas_verificar:
-            col_serie = "numero_de_serie" if tabla == "fibra_optica" else "numero_serie"
+            col_serie = "numero_serie" if tabla == "fibra_optica" else "numero_serie"
             query = f"""
                 SELECT EXISTS (
                     SELECT 1 FROM {tabla}
