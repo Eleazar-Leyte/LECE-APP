@@ -631,6 +631,13 @@ class Producción():
                 7: "imagen"
             },
         }
+        # Mapeo de tablas origen para imágenes
+        mapeo_tablas_imagen = {
+            "fibra_optica": "\"ONT en Campo\"",
+            "cobre": "modem_en_campo",
+            "quejas": "\"ONT en Campo\"",
+            "a4_incentivos": "modem_en_campo"
+        }
         for fila in range(tabla.rowCount()):
             try:
                 datos = {}
@@ -640,9 +647,14 @@ class Producción():
                     valor = item.text().strip() if item else ""
                     datos[mapeo_columnas[nombre_tabla][col]] = valor
 
-                # Manejar imagen
-                imagen_widget = tabla.cellWidget(fila, 7)
-                datos["imagen"] = self._obtener_imagen_bytes(imagen_widget)
+                # Obtener número de serie para buscar imagen original
+                numero_serie = datos["numero_serie"]
+
+                # Obtener imagen ORIGINAL desde Almacén
+                datos["imagen"] = self._obtener_imagen_original(
+                    numero_serie,
+                    mapeo_tablas_imagen[nombre_tabla]
+                )
 
                 # Añadir campos comunes
                 datos.update({
@@ -676,6 +688,28 @@ class Producción():
 
             except Exception as e:
                 raise RuntimeError(f"Fila {fila+1}: {str(e)}")
+
+    def _obtener_imagen_original(self, numero_serie: str, tabla_origen: str) -> bytes:
+        """Obtiene la imagen original en máxima calidad desde el almacén"""
+        try:
+            query = f"""
+                SELECT imagen FROM {tabla_origen}
+                WHERE "Numero de Serie" = %s
+                LIMIT 1
+            """
+            resultado = self.db_almacen.execute_query(query, (numero_serie,))
+
+            # Para quejas, verificar también en modem si no se encuentra en ONT
+            if not resultado and "ONT" in tabla_origen:
+                resultado = self.db_almacen.execute_query(
+                    "SELECT imagen FROM modem_en_campo WHERE \"Numero de Serie\" = %s",
+                    (numero_serie,)
+                )
+
+            return resultado[0]['imagen'] if resultado else None
+        except Exception as e:
+            print(f"Error obteniendo imagen original: {str(e)}")
+            return None
 
     def _obtener_imagen_bytes(self, widget: QtWidgets.QLabel) -> bytes:
         """

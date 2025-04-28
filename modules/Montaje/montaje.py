@@ -11,6 +11,7 @@ import json
 
 from DatabaseManager import DatabaseManager
 from TableManager import TableManager
+from modules.Montaje.exportar import Exportar
 
 
 class Montaje():
@@ -39,6 +40,7 @@ class Montaje():
         self.montaje.lista_instalaciones.itemClicked.connect(
             self._actualizar_tabla_materiales)
         self.montaje.btn_guardar.clicked.connect(self._guardar_cambios)
+        self.montaje.btn_exportar.clicked.connect(self.exportar_produccion)
 
     def regresar(self):
         """
@@ -278,6 +280,9 @@ class Montaje():
                                 "Folio sin datos asociados")
         except Exception as e:
             QMessageBox.critical(self.montaje, "Error", f"Error: {str(e)}")
+
+    def exportar_produccion(self):
+        self.exportar = Exportar(self.usuario_actual)
 # ---------------------------Consultas SQL ------------------------------------
 
     def _consultar_equipo(self, tipo_tabla: str, serie: str) -> list:
