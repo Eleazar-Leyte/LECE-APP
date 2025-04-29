@@ -2,6 +2,7 @@ import os
 import sys
 import zipfile
 import requests
+import tempfile
 import shutil
 from PyQt6.QtWidgets import QMessageBox
 
