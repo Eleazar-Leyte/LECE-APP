@@ -11,6 +11,8 @@ import os
 import sys
 import subprocess
 
+from modules.update_progres import UpdateProgressWindow
+
 
 class Login():
     def __init__(self):
