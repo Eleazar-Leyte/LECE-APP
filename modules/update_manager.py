@@ -8,7 +8,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 
 
-class UpdateManager:
+class UpdateManager(QObject):
     progress_updated = pyqtSignal(int)
     update_finished = pyqtSignal(bool)
 

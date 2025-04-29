@@ -65,8 +65,7 @@ class Login():
 
     def show_update_progress(self, updater):
         self.update_window = UpdateProgressWindow()
-        self.update_window.show()
-
+        self.login.hide()
         updater.progress_updated.connect(self.update_window.update_progress)
         updater.update_finished.connect(self.handle_update_result)
 
@@ -79,7 +78,7 @@ class Login():
     def handle_update_result(self, success):
         if success:
             QMessageBox.information(
-                self.update_window,
+                None,
                 "Reinicio",
                 "La aplicación se reiniciará para aplicar los cambios"
             )
