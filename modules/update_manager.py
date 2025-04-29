@@ -2,6 +2,7 @@ import os
 import sys
 import zipfile
 import requests
+import shutil
 from PyQt6.QtWidgets import QMessageBox
 
 
@@ -11,7 +12,7 @@ class UpdateManager:
             "repo": "Eleazar-Leyte/LECE-APP",
             "branch": "master",
             "version_file": "version.txt",
-            "excluded_files": ["config.json", ".env", ".gitignore", ".github/workflows/main.yml"],
+            "excluded_files": ["config.json", ".env", ".gitignore", ".github", ".github/workflows/main.yml"],
             "token": os.getenv("GH_PAT")
         }
 
@@ -49,18 +50,29 @@ class UpdateManager:
 
             # Extraer ajustando rutas
             with zipfile.ZipFile("update.zip", 'r') as zip_ref:
-                root_dir = zip_ref.namelist()[0]  # Ej: "LECE-APP-master/"
+                root_dir = zip_ref.namelist()[0]
                 for file in zip_ref.namelist():
                     if not any(excluido in file for excluido in self.config["excluded_files"]):
                         target_path = file.replace(root_dir, "", 1)
                         if target_path:
+                            # Eliminar archivo/directorio existente
+                            if os.path.exists(target_path):
+                                if os.path.isdir(target_path):
+                                    shutil.rmtree(
+                                        target_path, ignore_errors=True)
+                                else:
+                                    os.remove(target_path)
+                            # Crear directorio padre
+                            os.makedirs(os.path.dirname(
+                                target_path), exist_ok=True)
+                            # Extraer y mover
                             zip_ref.extract(file, ".")
-                            os.rename(file, target_path)
+                            shutil.move(file, target_path)  # Usar shutil.move
 
             os.remove("update.zip")
             return True
 
         except Exception as e:
-            QMessageBox.critical(None, "Error de Actualización",
-                                 f"Falló la actualización: {str(e)}")
+            QMessageBox.critical(
+                None, "Error de Actualización", f"Falló: {str(e)}")
             return False

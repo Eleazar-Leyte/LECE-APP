@@ -57,8 +57,8 @@ class Login():
                                     "Reinicio Requerido",
                                     "La aplicación se reiniciará para aplicar cambios"
                                 )
-                                os.execl(sys.executable,
-                                         sys.executable, *sys.argv)
+                                os.execl(f'"{sys.executable}"', '"' +
+                                         sys.executable + '"', *sys.argv)
                     self.menuadmin = MenuAdmin(self.usuario_actual)
                     print(self.usuario_actual)
                 elif res._rol == "Personal Técnico":

@@ -5,4 +5,5 @@
     "config.json",
     ".env",
     ".gitignore",
+    ".github",
     ".github/workflows/main.yml"]}
