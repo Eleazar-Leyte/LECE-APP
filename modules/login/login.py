@@ -2,12 +2,13 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QMessageBox
 
 from modules.update_manager import UpdateManager
-import os
-import sys
 from data.usuarios import UsuarioData
 from model.user import Usuario
 from modules.menu_admin import MenuAdmin  # MenuAdminsitrativo
-# from modules.tecnico_menu import TecnicoMenu
+
+import os
+import sys
+import subprocess
 
 
 class Login():
@@ -57,8 +58,9 @@ class Login():
                                     "Reinicio Requerido",
                                     "La aplicación se reiniciará para aplicar cambios"
                                 )
-                                os.execl(sys.executable,
-                                         sys.executable, *sys.argv)
+                                subprocess.Popen(
+                                    [sys.executable, os.path.abspath("index.py")])
+                                sys.exit()
                     self.menuadmin = MenuAdmin(self.usuario_actual)
                     print(self.usuario_actual)
                 elif res._rol == "Personal Técnico":
