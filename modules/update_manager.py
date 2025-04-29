@@ -13,6 +13,7 @@ class UpdateManager(QObject):
     update_finished = pyqtSignal(bool)
 
     def __init__(self):
+        super().__init__()
         self.config = {
             "repo": "Eleazar-Leyte/LECE-APP",
             "branch": "master",
