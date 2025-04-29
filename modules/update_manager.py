@@ -38,7 +38,7 @@ class UpdateManager:
             # En UpdateManager.perform_update():
             url = f"https://github.com/{self.config['repo']}/archive/refs/heads/{self.config['branch']}.zip"
             headers = {}
-            response = requests.get(url, headers=headers)
+            response = requests.get(url)
 
             # Validar respuesta
             if response.status_code != 200:
@@ -48,28 +48,35 @@ class UpdateManager:
             with open("update.zip", "wb") as f:
                 f.write(response.content)
 
-            # Extraer ajustando rutas
+            # Extraer a directorio temporal
+            temp_dir = None
             with zipfile.ZipFile("update.zip", 'r') as zip_ref:
-                root_dir = zip_ref.namelist()[0]
-                for file in zip_ref.namelist():
-                    if not any(excluido in file for excluido in self.config["excluded_files"]):
-                        target_path = file.replace(root_dir, "", 1)
-                        if target_path:
-                            # Eliminar archivo/directorio existente
-                            if os.path.exists(target_path):
-                                if os.path.isdir(target_path):
-                                    shutil.rmtree(
-                                        target_path, ignore_errors=True)
-                                else:
-                                    os.remove(target_path)
-                            # Crear directorio padre
-                            os.makedirs(os.path.dirname(
-                                target_path), exist_ok=True)
-                            # Extraer y mover
-                            zip_ref.extract(file, ".")
-                            shutil.move(file, target_path)  # Usar shutil.move
+                # Crear directorio temporal
+                temp_dir = tempfile.mkdtemp()
+                zip_ref.extractall(temp_dir)
 
+                # Obtener directorio raíz del repositorio dentro del ZIP
+                root_dir = zip_ref.namelist()[0].split('/')[0]
+                source_dir = os.path.join(temp_dir, root_dir)
+
+                # Copiar archivos excluyendo los especificados
+                for root, dirs, files in os.walk(source_dir):
+                    for file in files:
+                        src_path = os.path.join(root, file)
+                        rel_path = os.path.relpath(src_path, source_dir)
+
+                        if any(excl in rel_path for excl in self.config["excluded_files"]):
+                            continue
+
+                        dest_path = os.path.join(".", rel_path)
+                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                        shutil.copy2(src_path, dest_path)
+
+            # Limpiar
             os.remove("update.zip")
+            if temp_dir:
+                shutil.rmtree(temp_dir)
+
             return True
 
         except Exception as e:
