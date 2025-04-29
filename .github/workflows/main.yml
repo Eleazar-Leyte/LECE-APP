@@ -1,20 +1,25 @@
-name: Auto Versioning
+name: Version Manager
 on:
   push:
-    branches: [master]
+    branches: [ master ]
 
 jobs:
   update-version:
     runs-on: ubuntu-latest
+    permissions:  # Añadir estos permisos
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set version
-        run: |
-          echo "$(date +'%Y.%-m.0')" > version.txt
-          
-      - name: Commit version
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Auto-bump version"
-          file_pattern: version.txt
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_PAT }}  # Usar token personal
+
+    - name: Set new version
+      run: |
+        echo "$(date +'%Y.%-m.0')" > version.txt
+
+    - name: Commit changes
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "Auto-bump version"
+        file_pattern: version.txt
+        token: ${{ secrets.GH_PAT }}  # Forzar uso del token
