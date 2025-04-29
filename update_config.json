@@ -1,4 +1,8 @@
 {"repo": "Eleazar-Leyte/LECE-APP", 
 "branch": "master", 
 "version_file": "version.txt", 
-"excluded_files": ["config.json"]}
+"excluded_files": [
+    "config.json",
+    ".env",
+    ".gitignore",
+    ".github/workflows/main.yml"]}

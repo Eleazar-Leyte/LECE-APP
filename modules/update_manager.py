@@ -11,7 +11,7 @@ class UpdateManager:
             "repo": "Eleazar-Leyte/LECE-APP",
             "branch": "master",
             "version_file": "version.txt",
-            "excluded_files": ["config.json", ".env"],
+            "excluded_files": ["config.json", ".env", ".gitignore", ".github/workflows/main.yml"],
             "token": os.getenv("GH_PAT")
         }
 
