@@ -1,0 +1,64 @@
+<RCC>
+  <qresource prefix="Icons">
+    <file>almacen ngr.svg</file>
+    <file>Almacen.ico</file>
+    <file>almacen.svg</file>
+    <file>almacen_1.svg</file>
+    <file>apersonal.svg</file>
+    <file>arrow-left.svg</file>
+    <file>atras bc.svg</file>
+    <file>bar.svg</file>
+    <file>borrar.svg</file>
+    <file>buscar.svg</file>
+    <file>camara.svg</file>
+    <file>cargar.svg</file>
+    <file>Catalogo 2.svg</file>
+    <file>catalogo.svg</file>
+    <file>codebar,.svg</file>
+    <file>Code-Bar.png</file>
+    <file>codebar.svg</file>
+    <file>Descarga.png</file>
+    <file>descarga.svg</file>
+    <file>dwload.svg</file>
+    <file>editar.svg</file>
+    <file>enviar.svg</file>
+    <file>Escribir.png</file>
+    <file>Escribir.svg</file>
+    <file>FORMATO PROHIBICIÓN USO DE OBRA.docx</file>
+    <file>foto.svg</file>
+    <file>Guardar.svg</file>
+    <file>Icons.qrc</file>
+    <file>Imagen.png</file>
+    <file>Imagen.svg</file>
+    <file>imprimir.svg</file>
+    <file>listngr.svg</file>
+    <file>mas cuadrado.svg</file>
+    <file>mas.svg</file>
+    <file>qpersonal.svg</file>
+    <file>Qr.png</file>
+    <file>salir.svg</file>
+    <file>Save.png</file>
+    <file>sincronizar.svg</file>
+    <file>sincronizar_1.svg</file>
+    <file>truck.svg</file>
+    <file>truckngr.svg</file>
+    <file>user-check.svg</file>
+    <file>wifi.svg</file>
+    <file>apersonal.svg</file>
+    <file>arrow-left.svg</file>
+    <file>cargar.svg</file>
+    <file>descarga.svg</file>
+    <file>editar.svg</file>
+    <file>movimiento.svg</file>
+    <file>sincronizar.svg</file>
+    <file>atras bc.svg</file>
+    <file>arrow-left.svg</file>
+    <file>Almacen.ico</file>
+    <file>Code-Bar.png</file>
+    <file>Descarga.png</file>
+    <file>Escribir.png</file>
+    <file>Imagen.png</file>
+    <file>Qr.png</file>
+    <file>Save.png</file>
+  </qresource>
+</RCC>

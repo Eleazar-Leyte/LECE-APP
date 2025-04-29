@@ -1,6 +1,9 @@
 from PyQt6 import uic
 from PyQt6.QtWidgets import QMessageBox
 
+from modules.update_manager import UpdateManager
+import os
+import sys
 from data.usuarios import UsuarioData
 from model.user import Usuario
 from modules.menu_admin import MenuAdmin  # MenuAdminsitrativo
@@ -37,6 +40,25 @@ class Login():
                 }
 
                 if res._rol == "Admin":
+                    # Verificar actualizaciones si es Admin
+                    updater = UpdateManager()
+                    if updater.check_update():
+                        respuesta = QMessageBox.question(
+                            self.login,
+                            "Actualización Disponible",
+                            "¡Nueva versión detectada! ¿Actualizar ahora?",
+                            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                        )
+
+                        if respuesta == QMessageBox.StandardButton.Yes:
+                            if updater.perform_update():
+                                QMessageBox.information(
+                                    self.login,
+                                    "Reinicio Requerido",
+                                    "La aplicación se reiniciará para aplicar cambios"
+                                )
+                                os.execl(sys.executable,
+                                         sys.executable, *sys.argv)
                     self.menuadmin = MenuAdmin(self.usuario_actual)
                     print(self.usuario_actual)
                 elif res._rol == "Personal Técnico":

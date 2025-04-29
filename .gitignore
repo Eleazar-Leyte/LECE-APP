@@ -1,0 +1,6 @@
+.zip
+.env
+backup_*
+Entregas/
+reports/
+model/

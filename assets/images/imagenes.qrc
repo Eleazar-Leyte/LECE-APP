@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="recurso">
+    <file>Nuevo aspecto.png</file>
+  </qresource>
+</RCC>
