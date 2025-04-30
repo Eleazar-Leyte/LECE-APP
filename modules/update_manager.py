@@ -55,6 +55,14 @@ class UpdateManager(QObject):
             if response.status_code != 200:
                 raise Exception(f"Error HTTP {response.status_code}")
             total_size = int(response.headers.get('content-length', 0))
+            # Manejo en caso de tamaño desconocido
+            if total_size == 0:
+                self.progress_updated.emit(15)  # Progreso inicial
+                with open("update.zip", "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                        # Mantener progreso fijo
+                        self.progress_updated.emit(15)
             downloaded = 0
             self._update_progress(15)
 
