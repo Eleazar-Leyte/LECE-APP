@@ -31,11 +31,9 @@ class UpdateManager(QObject):
 
     def check_update(self):
         try:
-            # Obtener versión local
             with open(self.config["version_file"], "r") as f:
                 local_version = f.read().strip()
 
-            # Obtener versión remota
             url = f"https://raw.githubusercontent.com/{self.config['repo']}/{self.config['branch']}/{self.config['version_file']}"
             remote_version = requests.get(url).text.strip()
 
@@ -47,32 +45,22 @@ class UpdateManager(QObject):
 
     def perform_update(self):
         try:
-            # Descargar usando el token
-            # En UpdateManager.perform_update():
             url = f"https://github.com/{self.config['repo']}/archive/refs/heads/{self.config['branch']}.zip"
-            headers = {}
-            response = requests.get(url)
+            response = requests.get(url, stream=True)
 
-            # Validar respuesta
             if response.status_code != 200:
                 raise Exception(f"Error HTTP {response.status_code}")
-            total_size = int(response.headers.get('content-length', 0))
-            # Manejo en caso de tamaño desconocido
+
             total_size = int(response.headers.get('content-length', 0))
             downloaded = 0
 
-            # Manejar caso de tamaño desconocido
+            # Manejo de descarga
             if total_size == 0:
                 self.progress_updated.emit(15)
                 with open("update.zip", "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         f.write(chunk)
-                        # Mantener en 15% durante descarga
-                        self.progress_updated.emit(15)
-
-                self._update_progress(65)  # Saltar a 65% después de descarga
             else:
-                # Flujo normal con tamaño conocido
                 self._update_progress(15)
                 with open("update.zip", "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
@@ -81,15 +69,17 @@ class UpdateManager(QObject):
                         progress = int(15 + (downloaded / total_size) * 50)
                         self.progress_updated.emit(progress)
 
-                self._update_progress(65)
+            self._update_progress(65)
 
-            # Proceso de extracción (común para ambos casos)
+            # Proceso de extracción
             temp_dir = tempfile.mkdtemp()
             with zipfile.ZipFile("update.zip", 'r') as zip_ref:
                 root_dir = zip_ref.namelist()[0].split('/')[0]
                 zip_ref.extractall(temp_dir)
-                source_dir = os.path.join(temp_dir, root_dir)
+                # Fijar permisos antes de copiar
+                self.fix_permissions(temp_dir)
 
+                source_dir = os.path.join(temp_dir, root_dir)
                 files = [f for f in zip_ref.namelist() if not any(
                     excl in f for excl in self.config["excluded_files"])]
                 total_files = len(files)
@@ -116,18 +106,41 @@ class UpdateManager(QObject):
                 None, "Error", f"Actualización fallida: {str(e)}")
             return False
 
-    # Añadir estas funciones dentro de la clase UpdateManager:
+    # Funciones de manejo de permisos
     @staticmethod
-    def handle_remove_readonly(func, path, _):
-        os.chmod(path, stat.S_IWRITE | stat.S_IREAD)
-        func(path)
+    def fix_permissions(path):
+        """Establece permisos completos recursivamente"""
+        for root, dirs, files in os.walk(path):
+            for item in dirs + files:
+                full_path = os.path.join(root, item)
+                try:
+                    os.chmod(full_path, stat.S_IRWXU |
+                             stat.S_IRWXG | stat.S_IRWXO)
+                except:
+                    pass
 
-    def safe_delete(self, path, max_retries=3, delay=1):
-        for _ in range(max_retries):
+    def safe_delete(self, path, max_retries=5, delay=1.5):
+        """Eliminación con manejo mejorado para Windows"""
+        for attempt in range(max_retries):
             try:
+                if not os.path.exists(path):
+                    return
+                self.fix_permissions(path)
                 shutil.rmtree(path, onerror=self.handle_remove_readonly)
                 return
             except Exception as e:
-                time.sleep(delay)
-        raise Exception(
-            f"Error eliminando {path} después de {max_retries} intentos")
+                if attempt == max_retries - 1:
+                    raise Exception(f"Error eliminando {path}: {str(e)}")
+                time.sleep(delay * (attempt + 1))
+
+    @staticmethod
+    def handle_remove_readonly(func, path, _):
+        """Manejador de errores para archivos bloqueados"""
+        try:
+            os.chmod(path, stat.S_IRWXU)
+        except:
+            pass
+        try:
+            func(path)
+        except:
+            pass
