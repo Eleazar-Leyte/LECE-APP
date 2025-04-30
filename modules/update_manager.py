@@ -80,8 +80,10 @@ class UpdateManager(QObject):
                 self.fix_permissions(temp_dir)
 
                 source_dir = os.path.join(temp_dir, root_dir)
-                files = [f for f in zip_ref.namelist() if not any(
-                    excl in f for excl in self.config["excluded_files"])]
+                # Filtrar solo archivos (excluir directorios)
+                files = [f for f in zip_ref.namelist()
+                         if not any(excl in f for excl in self.config["excluded_files"])
+                         and not f.endswith('/')]
                 total_files = len(files)
 
                 for i, file in enumerate(files):
@@ -107,17 +109,22 @@ class UpdateManager(QObject):
             return False
 
     # Funciones de manejo de permisos
+    # Funciones de manejo de permisos
     @staticmethod
     def fix_permissions(path):
-        """Establece permisos completos recursivamente"""
+        """Establece permisos recursivamente y maneja atributos en Windows"""
         for root, dirs, files in os.walk(path):
             for item in dirs + files:
                 full_path = os.path.join(root, item)
                 try:
+                    # Eliminar atributo de solo lectura en Windows
+                    if os.name == 'nt':
+                        os.chmod(full_path, stat.S_IWRITE)
+                    # Establecer permisos completos
                     os.chmod(full_path, stat.S_IRWXU |
                              stat.S_IRWXG | stat.S_IRWXO)
-                except:
-                    pass
+                except Exception as e:
+                    print(f"Error ajustando permisos en {full_path}: {e}")
 
     def safe_delete(self, path, max_retries=5, delay=1.5):
         """Eliminación con manejo mejorado para Windows"""
@@ -125,8 +132,34 @@ class UpdateManager(QObject):
             try:
                 if not os.path.exists(path):
                     return
+
+                # Forzar cierre de cualquier manejador de archivos abierto
                 self.fix_permissions(path)
-                shutil.rmtree(path, onerror=self.handle_remove_readonly)
+
+                # Nueva técnica de eliminación recursiva
+                for root, dirs, files in os.walk(path, topdown=False):
+                    for name in files:
+                        file_path = os.path.join(root, name)
+                        try:
+                            os.chmod(file_path, stat.S_IWUSR)
+                            os.unlink(file_path)
+                        except Exception as e:
+                            pass
+                    for name in dirs:
+                        dir_path = os.path.join(root, name)
+                        try:
+                            os.chmod(dir_path, stat.S_IWUSR)
+                            os.rmdir(dir_path)
+                        except Exception as e:
+                            pass
+
+                # Eliminar directorio raíz final
+                try:
+                    os.chmod(path, stat.S_IWUSR)
+                    os.rmdir(path)
+                except:
+                    shutil.rmtree(path, ignore_errors=True)
+
                 return
             except Exception as e:
                 if attempt == max_retries - 1:
