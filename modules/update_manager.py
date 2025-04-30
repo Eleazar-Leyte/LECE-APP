@@ -56,27 +56,33 @@ class UpdateManager(QObject):
                 raise Exception(f"Error HTTP {response.status_code}")
             total_size = int(response.headers.get('content-length', 0))
             # Manejo en caso de tamaño desconocido
+            total_size = int(response.headers.get('content-length', 0))
+            downloaded = 0
+
+            # Manejar caso de tamaño desconocido
             if total_size == 0:
-                self.progress_updated.emit(15)  # Progreso inicial
+                self.progress_updated.emit(15)
                 with open("update.zip", "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         f.write(chunk)
-                        # Mantener progreso fijo
+                        # Mantener en 15% durante descarga
                         self.progress_updated.emit(15)
-            downloaded = 0
-            self._update_progress(15)
 
-            # Guardar ZIP
-            with open("update.zip", "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-                    downloaded += len(chunk)
-                    progress = int(15 + (downloaded / total_size) * 50)
-                    self.progress_updated.emit(progress)
+                self._update_progress(65)  # Saltar a 65% después de descarga
+            else:
+                # Flujo normal con tamaño conocido
+                self._update_progress(15)
+                with open("update.zip", "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        progress = int(15 + (downloaded / total_size) * 50)
+                        self.progress_updated.emit(progress)
 
-            self._update_progress(65)
+                self._update_progress(65)
+
+            # Proceso de extracción (común para ambos casos)
             temp_dir = tempfile.mkdtemp()
-            # Extraer ZIP
             with zipfile.ZipFile("update.zip", 'r') as zip_ref:
                 root_dir = zip_ref.namelist()[0].split('/')[0]
                 zip_ref.extractall(temp_dir)
