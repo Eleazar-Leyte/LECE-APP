@@ -20,7 +20,7 @@ class UpdateManager(QObject):
             "repo": "Eleazar-Leyte/LECE-APP",
             "branch": "master",
             "version_file": "version.txt",
-            "excluded_files": ["config.json", ".env", ".gitignore", ".github", ".github/workflows/main.yml"],
+            "excluded_files": ["config.json", ".env", ".gitignore", ".github", ".github/workflows/main.yml", "DatabaseManager.py"],
             "token": os.getenv("GH_PAT")
         }
         self.progress = 0

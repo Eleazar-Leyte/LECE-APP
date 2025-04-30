@@ -4,3 +4,6 @@ backup_*
 Entregas/
 reports/
 model/
+.vscode/
+__pycache__/
+venv/

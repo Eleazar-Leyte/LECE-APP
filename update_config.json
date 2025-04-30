@@ -6,4 +6,5 @@
     ".env",
     ".gitignore",
     ".github",
-    ".github/workflows/main.yml"]}
+    ".github/workflows/main.yml",
+    "DatabaseManager.py"]}
