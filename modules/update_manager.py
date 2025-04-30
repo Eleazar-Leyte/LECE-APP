@@ -4,6 +4,8 @@ import zipfile
 import requests
 import tempfile
 import shutil
+import time
+import stat
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 
@@ -104,7 +106,7 @@ class UpdateManager(QObject):
                         65 + int((i / total_files) * 25))
 
             os.remove("update.zip")
-            shutil.rmtree(temp_dir)
+            self.safe_delete(temp_dir)
             self._update_progress(100)
             return True
 
@@ -113,3 +115,19 @@ class UpdateManager(QObject):
             QMessageBox.critical(
                 None, "Error", f"Actualización fallida: {str(e)}")
             return False
+
+    # Añadir estas funciones dentro de la clase UpdateManager:
+    @staticmethod
+    def handle_remove_readonly(func, path, _):
+        os.chmod(path, stat.S_IWRITE | stat.S_IREAD)
+        func(path)
+
+    def safe_delete(self, path, max_retries=3, delay=1):
+        for _ in range(max_retries):
+            try:
+                shutil.rmtree(path, onerror=self.handle_remove_readonly)
+                return
+            except Exception as e:
+                time.sleep(delay)
+        raise Exception(
+            f"Error eliminando {path} después de {max_retries} intentos")
