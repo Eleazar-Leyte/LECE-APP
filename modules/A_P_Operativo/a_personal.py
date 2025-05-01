@@ -1,9 +1,8 @@
-import sqlite3
-
 from PyQt6 import uic
 from PyQt6.QtWidgets import QMessageBox
-
 from DatabaseManager import DatabaseManager
+import sys
+import os
 
 
 class A_Personal():
@@ -12,17 +11,13 @@ class A_Personal():
         self.a_personal = uic.loadUi("modules/A_P_Operativo/A_personal.ui")
         self.a_personal.show()
 
-        # Conectamos los botones de la Ui
-        self.botones()
-
-        # Conexión a la base de datos 'Personal'
+        # Conexión a PostgreSQL para todas las operaciones
         self.db_manager_personal = DatabaseManager('Personal')
+        # Base de datos de áreas en PostgreSQL
+        self.db_manager_areas = DatabaseManager('Áreas')
 
-        # Conexión a la base de datos áreas
-        self.conn_areas = sqlite3.connect("Areas.db")
-        self.cursor_areas = self.conn_areas.cursor()
-
-        # Cargamos el ComboBox de Áreas
+        # Conectar botones y cargar áreas
+        self.botones()
         self.cargar_areas()
 
     def botones(self):
@@ -31,11 +26,12 @@ class A_Personal():
 
     def cargar_areas(self):
         """
-        Carga las áreas disponibles en el ComboBox según el rol y área del usuario actual.
+        Carga las áreas disponibles desde PostgreSQL.
         """
-        self.a_personal.str_area.clear()  # Limpiar el ComboBox antes de cargar nuevas áreas
+        self.a_personal.str_area.clear()
         self.a_personal.str_area.currentIndexChanged.connect(
             self.actualizar_cope)
+
         try:
             if self.usuario_actual['rol'] == 'Directivo':
                 # Consultar todas las áreas para los administradores
@@ -64,16 +60,12 @@ class A_Personal():
             )
 
     def actualizar_cope(self):
-        """
-        Actualiza los valores del ComboBox de Copé basándose en el área seleccionada.
-        """
         area_seleccionada = self.a_personal.str_area.currentText().strip()
-        # Limpiar el ComboBox antes de cargar nuevos valores
         self.a_personal.str_cope.clear()
 
-        if not area_seleccionada or area_seleccionada == "":
-            QMessageBox.warning(self.a_personal, "Advertencia",
-                                "Por favor, seleccione un área.")
+        if not area_seleccionada:
+            QMessageBox.warning(
+                self.a_personal, "Advertencia", "Seleccione un área.")
             return
 
         try:
@@ -88,18 +80,11 @@ class A_Personal():
                     self.a_personal.str_cope.addItem(resultado['Copé'])
             else:
                 QMessageBox.information(
-                    self.a_personal, "Información", "No se encontraron Copé disponibles para esta área."
-                )
+                    self.a_personal, "Información", "No hay Copé para esta área.")
 
         except Exception as e:
-            print(f"Error al actualizar los Copé: {e}")
-            QMessageBox.critical(
-                self.a_personal, "Error", f"Error al cargar los datos de Copé: {e}"
-            )
-        finally:
-            # Cerrar la conexion a la base de datos "'Area" si se abrió
-            if db_manager_areas and db_manager_areas.is_connected():
-                db_manager_areas.close()
+            QMessageBox.critical(self.a_personal, "Error",
+                                 f"Error al cargar Copé: {str(e)}")
 
     def agregar_personal_o(self):
         """

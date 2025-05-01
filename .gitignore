@@ -7,3 +7,7 @@ model/
 .vscode/
 __pycache__/
 venv/
+upx/
+postgres_dlls/
+hooks/
+*.spec
