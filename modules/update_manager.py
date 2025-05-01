@@ -81,9 +81,10 @@ class UpdateManager(QObject):
 
                 source_dir = os.path.join(temp_dir, root_dir)
                 # Filtrar solo archivos (excluir directorios)
-                files = [f for f in zip_ref.namelist()
-                         if not any(excl in f for excl in self.config["excluded_files"])
-                         and not f.endswith('/')]
+                files = [
+                    f for f in zip_ref.namelist()
+                    if not any(f == excl or f.startswith(excl + '/') for excl in self.config["excluded_files"])
+                ]
                 total_files = len(files)
 
                 for i, file in enumerate(files):
