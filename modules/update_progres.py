@@ -1,16 +1,24 @@
-from PyQt6.QtWidgets import QMainWindow  # <-- Añadir import
+from PyQt6.QtWidgets import QMainWindow
 from PyQt6 import uic
 import os
+import sys
 
 
-class UpdateProgressWindow(QMainWindow):  # <-- Heredar de QMainWindow
+class UpdateProgressWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        current_dir = os.path.dirname(__file__)
-        ui_path = os.path.join(current_dir, "actualizando.ui")
-        self.update = uic.loadUi(ui_path)
-        self.update.show()
-        self.update.barradeprogreso.setValue(0)
+
+        # Manejar rutas para producción/desarrollo
+        if getattr(sys, 'frozen', False):
+            base_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(__file__)
+
+        ui_path = os.path.join(base_dir, "actualizando.ui")
+        self.ui = uic.loadUi(ui_path)
+        self.setCentralWidget(self.ui)
+        self.ui.barradeprogreso.setValue(0)
+        self.show()
 
     def update_progress(self, value):
-        self.update.barradeprogreso.setValue(value)
+        self.ui.barradeprogreso.setValue(value)

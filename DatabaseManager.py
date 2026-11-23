@@ -76,7 +76,7 @@ class DatabaseManager:
                     dsn=self.db_config['dsn'],
                     sslmode='require'
                 )
-                # Metodo para conexion local
+                # # Metodo para conexion local
                 # self.connection = psycopg2.connect(**self.db_config)
             except psycopg2.Error as e:
                 print(

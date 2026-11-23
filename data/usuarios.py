@@ -1,5 +1,5 @@
 import psycopg2
-from model.user import Usuario
+from shared.model.user import Usuario
 from conexion import Conexion
 
 

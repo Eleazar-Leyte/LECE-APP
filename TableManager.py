@@ -1,7 +1,9 @@
+import base64
+
 from PyQt6 import QtWidgets, QtGui
-from PyQt6.QtWidgets import QTableWidgetItem, QLabel
-from PyQt6.QtGui import QPixmap, QImage
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QPushButton, QTableWidgetItem, QLabel
+from PyQt6.QtGui import QIcon, QPixmap, QImage
+from PyQt6.QtCore import QSize, Qt
 
 
 class TableManager:
@@ -40,7 +42,7 @@ class TableManager:
         ],
         "Asignacion_PO": [
             "Número de Serie", "Cantidad", "Unidad", "Modelo", "Imagen", "Tipo", "Fecha",
-            "Cantidad a Entregar"
+            "Cantidad"
         ],
         "Entregas": [
             "Id entrega", "Area", "COPE", "Expediente técnico", "Fecha de entrega",
@@ -70,32 +72,32 @@ class TableManager:
 
     COLUMN_MAPPINGS = {
         "Almacén": {
-            "Cantidad": "total_cantidad",
-            "Unidad": "unidad",
-            "Descripción": "descripcion",
-            "Número de Serie": "numeros_de_serie",
-            "Área": "area",
-            "COPE": "cope"
+            "Cantidad": "Cantidad",
+            "Unidad": "Unidad",
+            "Descripción": "Descripción",
+            "Número de Serie": "Número de Serie",
+            "Área": "Área",
+            "COPE": "COPE"
         },
         "MODEM": {
-            "Número de Serie": "Numero de Serie",
-            "Cantidad": "cantidad",
-            "Unidad": "unidad",
-            "Modelo": "modelo",
-            "Área": "area",
+            "Número de Serie": "Número de Serie",
+            "Cantidad": "Cantidad",
+            "Unidad": "Unidad",
+            "Modelo": "Modelo",
+            "Área": "Área",
             "Centro de Trabajo": "Centro de Trabajo",
-            "Ubicación": "ubicacion",
-            "Imagen": "imagen"
+            "Ubicación": "Ubicación",
+            "Imagen": "Imagen"
         },
         "ONT": {
-            "Número de Serie": "Numero de Serie",
-            "Cantidad": "cantidad",
-            "Unidad": "unidad",
-            "Modelo": "modelo",
-            "Área": "area",
+            "Número de Serie": "Número de Serie",
+            "Cantidad": "Cantidad",
+            "Unidad": "Unidad",
+            "Modelo": "Modelo",
+            "Área": "Área",
             "Centro de Trabajo": "Centro de Trabajo",
-            "Ubicación": "ubicacion",
-            "Imagen": "imagen"
+            "Ubicación": "Ubicación",
+            "Imagen": "Imagen"
         },
         "ONT en campo": {
             "Número de Serie": "Numero de Serie",
@@ -159,7 +161,7 @@ class TableManager:
             "Imagen": "imagen",
             "Tipo": "tipo",
             "Fecha": "Fecha de Registro",
-            "Cantidad a Entregar": "cantidad_a_entregar"
+            "Cantidad": "cantidad_a_entregar"
         },
         "Entregas": {
             "Id entrega": "id_entrega",
@@ -221,7 +223,7 @@ class TableManager:
     }
 
     @staticmethod
-    def populate_table(table_widget, data, table_name):
+    def populate_table(table_widget, data, table_name, on_image_click=None):
         """
         Llena un widget de tabla (QTableWidget) con datos de la base de datos y encabezados predefinidos.
         """
@@ -253,28 +255,30 @@ class TableManager:
                 column_name = column_mapping.get(header)
                 # Recuperar el valor por columna real
                 value = row_data.get(column_name, "")
-                if has_image and col_idx == image_column_index and value:
-                    # Procesar y mostrar la imagen
-                    label = QLabel()
-                    pixmap = TableManager._convert_blob_to_pixmap(value)
-                    if pixmap:
-                        label.setPixmap(pixmap.scaled(
-                            100, 100, Qt.AspectRatioMode.KeepAspectRatio
-                        ))
-                        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                        table_widget.setCellWidget(row_idx, col_idx, label)
-                    else:
-                        table_widget.setItem(
-                            row_idx, col_idx, QTableWidgetItem("Imagen inválida"))
-                else:
-                    # Insertar texto normal
-                    table_widget.setItem(
-                        row_idx, col_idx, QTableWidgetItem(str(value) if value else ""))
 
-        # Ajustar el tamaño de las columnas
+                if has_image and col_idx == image_column_index and value:
+                    # Creamos el boton con icono
+                    btn = QPushButton()
+                    btn.setIcon(QIcon("assets/icons/eye.svg"))
+                    btn.setIconSize(QSize(20, 20))
+                    btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                    btn.setToolTip("Ver imagen")
+
+                    # Guardar el identificador (Numero de serie) como propiedad
+                    btn.setProperty("identificador", value)
+                    if on_image_click:
+                        btn.clicked.connect(lambda checked, b=btn: on_image_click(
+                            b.property("identificador"), table_name))
+                        table_widget.setCellWidget(row_idx, col_idx, btn)
+                else:
+                    item = QTableWidgetItem(str(value) if value else "")
+                    # Evitar que la columna Imagen sea editable
+                    if header not in ["Imagen"]:
+                        item.setFlags(item.flags() & ~
+                                      Qt.ItemFlag.ItemIsEditable)
+                    table_widget.setItem(row_idx, col_idx, item)
         table_widget.horizontalHeader().setSectionResizeMode(
-            QtWidgets.QHeaderView.ResizeMode.Stretch
-        )
+            QtWidgets.QHeaderView.ResizeMode.Stretch)
 
     @staticmethod
     def _convert_blob_to_pixmap(blob_data):

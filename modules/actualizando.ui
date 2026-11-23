@@ -138,10 +138,7 @@ border-radius: 10px;</string>
     </item>
    </layout>
    <zorder>barradeprogreso</zorder>
-   <zorder>Logo</zorder>
    <zorder>ln</zorder>
-   <zorder>horizontalSpacer</zorder>
-   <zorder>horizontalSpacer_2</zorder>
   </widget>
  </widget>
  <resources/>

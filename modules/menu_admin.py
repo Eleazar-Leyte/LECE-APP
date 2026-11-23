@@ -1,40 +1,96 @@
-from PyQt6 import uic
-
-from modules.Almacenes.almacen import Almacen
+from PyQt6.QtCore import QObject
+from .inicio import MainMenuUI
+from modules.Almacenes.almacen import AlmacenController
 from modules.A_P_Operativo.personal import Personal
-from modules.Produccion.producción import Producción
-from modules.Montaje.montaje import Montaje
+from modules.Produccion.produccion_controler import ProduccionController
+from modules.Montaje.montaje_controlador import MontajeController
 
 
-class MenuAdmin():
+class MenuAdmin(QObject):
     def __init__(self, usuario_actual):
+        super().__init__()
         self.usuario_actual = usuario_actual
-        self.pestaña1 = uic.loadUi("modules/Pestaña 1.ui")
-        self.pestaña1.show()
-        self.botones()
+        self.ui = MainMenuUI()
+        self.ui.show()
 
-    def botones(self):
-        self.pestaña1.btn_personal.clicked.connect(self.win_personal)
-        self.pestaña1.btn_almacen.clicked.connect(self.win_almacen)
-        self.pestaña1.btn_produccion.clicked.connect(self.win_produccion)
-        self.pestaña1.btn_montaje.clicked.connect(self.win_montaje)
-        self.pestaña1.btn_salir.clicked.connect(self.salir)
+        # Configurar UI con datos del usuario
+        self.setup_ui()
 
-    def win_personal(self):
-        self.personal = Personal(self.usuario_actual)
-        self.pestaña1.close()
+        # Conectar señales
+        self.ui.btn_logout.clicked.connect(self.logout)
+        self.ui.show()
 
-    def win_almacen(self):
-        self.almacen = Almacen(self.usuario_actual)
-        self.pestaña1.close()
+    def setup_ui(self):
+        """Configura la interfaz con datos del usuario"""
+        # Configurar encabezado
+        self.ui.setup_header(
+            user_name=self.usuario_actual["name"],
+            user_role=self.usuario_actual["rol"],
+            user_area=self.usuario_actual["area"]
+        )
 
-    def win_produccion(self):
-        self.produccion = Producción(self.usuario_actual)
-        self.pestaña1.close()
+        # Añadir tarjetas de menú según el rol
+        menu_items = self.get_menu_items_by_role()
 
-    def win_montaje(self):
-        self.montaje = Montaje(self.usuario_actual)
-        self.pestaña1.close()
+        for item in menu_items:
+            card = self.ui.add_menu_card(
+                icon=item["icon"],
+                title=item["title"],
+                description=item["desc"],
+                card_id=item["id"]
+            )
+            card.clicked.connect(
+                lambda _, i=item["id"]: self.handle_menu_click(i))
 
-    def salir(self):
-        self.pestaña1.close()
+    def get_area_name(self, area_id):
+        """Convierte el ID de área a nombre legible"""
+        areas = {
+            1: "Administración",
+            2: "Producción",
+            3: "Almacén",
+            4: "Montaje",
+            5: "Recursos Humanos"
+        }
+        return areas.get(area_id, f"Área {area_id}")
+
+    def get_menu_items_by_role(self):
+        """Devuelve los ítems de menú según el rol del usuario"""
+        base_items = [
+            {"id": "personal", "icon": "👷", "title": "Personal",
+             "desc": "Gestión del personal operativo", "roles": ["Admin", "Personal Administrativo"]},
+            {"id": "almacen", "icon": "📦", "title": "Almacén",
+             "desc": "Gestión de inventario y materiales", "roles": ["Admin", "Personal Técnico"]},
+            {"id": "produccion", "icon": "🏭", "title": "Producción",
+             "desc": "Seguimiento de procesos productivos", "roles": ["Admin", "Personal Técnico"]},
+            {"id": "montaje", "icon": "🔧", "title": "Montaje",
+             "desc": "Gestión de ensamblaje final", "roles": ["Admin", "Personal Técnico"]},
+            {"id": "reportes", "icon": "📊", "title": "Reportes",
+             "desc": "Generar análisis detallados", "roles": ["Admin", "Personal Administrativo"]},
+            {"id": "config", "icon": "⚙️", "title": "Configuración",
+             "desc": "Ajustes del sistema", "roles": ["Admin"]}
+        ]
+
+        # Filtrar por rol del usuario actual
+        return [item for item in base_items
+                if self.usuario_actual["rol"] in item["roles"]]
+
+    def handle_menu_click(self, menu_id):
+        """Maneja el clic en una tarjeta de menú"""
+        self.ui.close()
+
+        if menu_id == "personal":
+            self.win = Personal(self.usuario_actual)
+        elif menu_id == "almacen":
+            self.win = AlmacenController(self.usuario_actual)
+        elif menu_id == "produccion":
+            self.win = ProduccionController(self.usuario_actual)
+        elif menu_id == "montaje":
+            self.win = MontajeController(self.usuario_actual)
+        elif menu_id == "reportes":
+            print("Abriendo reportes...")
+        elif menu_id == "config":
+            print("Abriendo configuración...")
+
+    def logout(self):
+        """Cierra sesión y vuelve al login"""
+        self.ui.close()
