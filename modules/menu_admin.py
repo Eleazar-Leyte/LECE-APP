@@ -4,6 +4,7 @@ from modules.Almacenes.almacen import AlmacenController
 from modules.A_P_Operativo.personal import Personal
 from modules.Produccion.produccion_controler import ProduccionController
 from modules.Montaje.montaje_controlador import MontajeController
+from modules.reportes.reportes import ReportesController
 
 
 class MenuAdmin(QObject):
@@ -87,7 +88,7 @@ class MenuAdmin(QObject):
         elif menu_id == "montaje":
             self.win = MontajeController(self.usuario_actual)
         elif menu_id == "reportes":
-            print("Abriendo reportes...")
+            self.win = ReportesController(self.usuario_actual)
         elif menu_id == "config":
             print("Abriendo configuración...")
 
