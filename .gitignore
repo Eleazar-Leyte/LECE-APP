@@ -23,3 +23,4 @@ modules/Produccion/__pycache__/
 modules/A_P_Operativo/__pycache__/
 modules/login/__pycache__/
 backend/API/db/__pycache__/
+config.json
