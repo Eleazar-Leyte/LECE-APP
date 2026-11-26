@@ -5,6 +5,7 @@ from modules.A_P_Operativo.personal import Personal
 from modules.Produccion.produccion_controler import ProduccionController
 from modules.Montaje.montaje_controlador import MontajeController
 from modules.reportes.reportes import ReportesController
+from modules.ajustes.ajustes import AjustesController
 
 
 class MenuAdmin(QObject):
@@ -90,7 +91,7 @@ class MenuAdmin(QObject):
         elif menu_id == "reportes":
             self.win = ReportesController(self.usuario_actual)
         elif menu_id == "config":
-            print("Abriendo configuración...")
+            self.win = AjustesController(self.usuario_actual)
 
     def logout(self):
         """Cierra sesión y vuelve al login"""

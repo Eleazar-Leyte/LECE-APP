@@ -1,11 +1,11 @@
-# main_menu_ui.py
-import sys
+import base64
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout, QPushButton,
     QLabel, QVBoxLayout, QHBoxLayout, QScrollArea, QSizePolicy
 )
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QPixmap, QPainter, QPainterPath
 from PyQt6.QtCore import Qt, QSize
+from modules.ajustes.settings_manager import SettingsManager
 
 
 class MainMenuUI(QMainWindow):
@@ -69,23 +69,47 @@ class MainMenuUI(QMainWindow):
             if child.widget():
                 child.widget().deleteLater()
 
-        # Icono de usuario
-        self.user_icon_label = QLabel("👤")
-        self.user_icon_label.setFixedSize(40, 40)
-        self.user_icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # Usar estilo del sistema
-        self.user_icon_label.setStyleSheet("""
-            QLabel {
-                background: palette(mid);
-                color: palette(text);
-                border-radius: 20px;
-                font-size: 20px;
-            }
-        """)
+        # Crear el QLabel para el avatar
+        self.lbl_avatar = QLabel()
+        self.lbl_avatar.setFixedSize(60, 60)
+        self.lbl_avatar.setStyleSheet(
+            "background-color: transparent; border-radius: 30px;")
+        self.lbl_avatar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Cargar foto de perfil si existe
+        config = SettingsManager.cargar_config()
+        foto_b64 = config.get("perfil_b64")
+
+        if foto_b64:
+            pixmap = QPixmap()
+            pixmap.loadFromData(base64.b64decode(foto_b64))
+            if not pixmap.isNull():
+                # Crear imagen circular
+                target = QPixmap(60, 60)
+                target.fill(Qt.GlobalColor.transparent)
+                painter = QPainter(target)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                path = QPainterPath()
+                path.addEllipse(0, 0, 60, 60)
+                painter.setClipPath(path)
+                scaled = pixmap.scaled(
+                    60, 60, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
+                x = (scaled.width() - 60) // 2
+                y = (scaled.height() - 60) // 2
+                painter.drawPixmap(0, 0, scaled, x, y, 60, 60)
+                painter.end()
+
+                self.lbl_avatar.setPixmap(target)
+        else:
+            # Si no hay foto, mostrar un ícono por defecto (puedes usar un emoji o un ícono de la carpeta assets)
+            self.lbl_avatar.setText("👤")
+            self.lbl_avatar.setFont(QFont("Arial", 28))
+            self.lbl_avatar.setStyleSheet(
+                "background-color: #E0E0E0; border-radius: 30px; color: #333;")
 
         # Información del usuario
         self.user_info_label = QLabel(
-            f"<h2>Bienvenido, <span style='color: palette(highlight);'>{user_name}</span></h2>"
+            f"<h2>Bienvenido, <span style='color: #8BC34A;'>{user_name}</span></h2>"
             f"<p>Área: {user_area} | Rol: {user_role}</p>"
         )
 
@@ -94,21 +118,20 @@ class MainMenuUI(QMainWindow):
         self.btn_logout.setStyleSheet("""
             QPushButton {
                 padding: 10px 20px;
-                background: palette(button);
-                color: palette(button-text);
-                border: 1px solid palette(mid);
+                background-color: #555;
+                color: white;
+                border: 1px solid #444;
                 border-radius: 6px;
+                font: 11pt "MS Shell Dlg 2";
             }
             QPushButton:hover {
-                background: palette(light);
-            }
-            QPushButton:pressed {
-                background: palette(dark);
+                background-color: #666;
             }
         """)
 
         # Agregar componentes al layout
-        self.header_layout.addWidget(self.user_icon_label)
+        self.header_layout.addWidget(self.lbl_avatar)
+        self.header_layout.addSpacing(15)  # Espacio entre avatar y texto
         self.header_layout.addWidget(self.user_info_label)
         self.header_layout.addStretch()
         self.header_layout.addWidget(self.btn_logout)
