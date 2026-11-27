@@ -4,9 +4,9 @@ from PyQt6.QtWidgets import (QMessageBox, QCalendarWidget, QDialog, QVBoxLayout,
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon
 
-from modules.Produccion.produccion_ui import ProduccionUI
+from desktop.modules.Produccion.produccion_ui import ProduccionUI
 from TableManager import TableManager
-from modules.Almacenes.api_worker import ApiWorker
+from desktop.modules.Almacenes.api_worker import ApiWorker
 
 
 class ProduccionController:
@@ -499,7 +499,7 @@ class ProduccionController:
             t.setRowCount(0)
 
     def regresar(self):
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.produccion.close()
 

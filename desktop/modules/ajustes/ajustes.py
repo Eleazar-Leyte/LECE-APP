@@ -4,9 +4,9 @@ from PyQt6.QtWidgets import QMessageBox, QFileDialog, QFileDialog, QDialog
 from PyQt6.QtGui import QPixmap, QIcon, QPainter, QPainterPath
 from PyQt6.QtCore import Qt
 
-from modules.ajustes.ajustes_ui import AjustesUI
-from modules.ajustes.settings_manager import SettingsManager
-from modules.ajustes.editor_foto import EditorFotoDialog
+from desktop.modules.ajustes.ajustes_ui import AjustesUI
+from desktop.modules.ajustes.settings_manager import SettingsManager
+from desktop.modules.ajustes.editor_foto import EditorFotoDialog
 
 
 class AjustesController:
@@ -137,7 +137,7 @@ class AjustesController:
                                  "No se pudo conectar con la API.")
 
     def regresar(self):
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.ajustes.close()
 

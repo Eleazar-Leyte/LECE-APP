@@ -5,7 +5,7 @@ import pandas as pd
 import requests
 import json
 from TableManager import TableManager
-from modules.A_P_Operativo.personal_ui import PersonalUI
+from desktop.modules.A_P_Operativo.personal_ui import PersonalUI
 
 
 class AreaLoaderThread(QThread):
@@ -419,7 +419,7 @@ class Personal:
 
     def regresar(self):
         """Regresa al menú principal"""
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.personal.close()
 

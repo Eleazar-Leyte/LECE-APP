@@ -2,19 +2,19 @@ from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import QComboBox, QMessageBox
 import uuid
 
-from modules.Almacenes.almacen_ui import AlmacenUI
-from modules.Almacenes.api_worker import ApiWorker
-from modules.Almacenes.image_handler import ImageHandler
+from desktop.modules.Almacenes.almacen_ui import AlmacenUI
+from desktop.modules.Almacenes.api_worker import ApiWorker
+from desktop.modules.Almacenes.image_handler import ImageHandler
 from TableManager import TableManager
 
 # Importar controladores de paneles
-from modules.Almacenes.controllers.ont_panel_controller import OntPanelController
-from modules.Almacenes.controllers.modem_panel_controller import ModemPanelController
-from modules.Almacenes.controllers.almacen_panel_controller import AlmacenPanelController
-from modules.Almacenes.controllers.catalogo_panel_controller import CatalogoPanelController
-from modules.Almacenes.controllers.movimiento_panel_controller import MovimientoPanelController
-from modules.Almacenes.controllers.entrega_panel_controller import EntregaPanelController
-from modules.Almacenes.controllers.recibir_panel_controller import RecibirPanelController
+from desktop.modules.Almacenes.controllers.ont_panel_controller import OntPanelController
+from desktop.modules.Almacenes.controllers.modem_panel_controller import ModemPanelController
+from desktop.modules.Almacenes.controllers.almacen_panel_controller import AlmacenPanelController
+from desktop.modules.Almacenes.controllers.catalogo_panel_controller import CatalogoPanelController
+from desktop.modules.Almacenes.controllers.movimiento_panel_controller import MovimientoPanelController
+from desktop.modules.Almacenes.controllers.entrega_panel_controller import EntregaPanelController
+from desktop.modules.Almacenes.controllers.recibir_panel_controller import RecibirPanelController
 
 
 class AreaLoaderWorker(ApiWorker):
@@ -413,7 +413,7 @@ class AlmacenController:
     # === Navegación ===
 
     def regresar(self):
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.almacen.close()
 

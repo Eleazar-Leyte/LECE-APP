@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import QTimer
 
 # Importamos nuestra nueva UI
-from modules.login.login_ui import LoginUI
-from modules.menu_admin import MenuAdmin
+from desktop.modules.login.login_ui import LoginUI
+from desktop.modules.menu_admin import MenuAdmin
 
 import os
 import sys

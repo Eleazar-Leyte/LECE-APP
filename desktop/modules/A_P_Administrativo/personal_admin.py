@@ -1,7 +1,7 @@
 import uuid
 from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem
-from modules.A_P_Administrativo.personal_admin_ui import PersonalAdminUI
-from modules.Almacenes.api_worker import ApiWorker
+from desktop.modules.A_P_Administrativo.personal_admin_ui import PersonalAdminUI
+from desktop.modules.Almacenes.api_worker import ApiWorker
 
 
 class PersonalAdminController:
@@ -131,7 +131,7 @@ class PersonalAdminController:
 
     def regresar(self):
         self.cleanup_workers()
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.ui.close()
 

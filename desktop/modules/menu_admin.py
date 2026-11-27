@@ -1,13 +1,13 @@
 from PyQt6.QtCore import QObject
 from .inicio import MainMenuUI
-from modules.Almacenes.almacen import AlmacenController
-from modules.A_P_Operativo.personal import Personal
-from modules.Produccion.produccion_controler import ProduccionController
-from modules.Montaje.montaje_controlador import MontajeController
-from modules.reportes.reportes import ReportesController
-from modules.ajustes.ajustes import AjustesController
-from modules.usuarios.usuarios import UsuariosController
-from modules.A_P_Administrativo.personal_admin import PersonalAdminController
+from desktop.modules.Almacenes.almacen import AlmacenController
+from desktop.modules.A_P_Operativo.personal import Personal
+from desktop.modules.Produccion.produccion_controler import ProduccionController
+from desktop.modules.Montaje.montaje_controlador import MontajeController
+from desktop.modules.reportes.reportes import ReportesController
+from desktop.modules.ajustes.ajustes import AjustesController
+from desktop.modules.usuarios.usuarios import UsuariosController
+from desktop.modules.A_P_Administrativo.personal_admin import PersonalAdminController
 
 
 class MenuAdmin(QObject):

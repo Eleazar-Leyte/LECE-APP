@@ -4,8 +4,8 @@ from PyQt6.QtCharts import QChart, QBarSeries, QBarSet, QBarCategoryAxis, QValue
 from PyQt6.QtGui import QPainter, QColor, QFont
 from PyQt6.QtCore import Qt, QDateTime
 
-from modules.reportes.reportes_ui import ReportesUI
-from modules.Almacenes.api_worker import ApiWorker
+from desktop.modules.reportes.reportes_ui import ReportesUI
+from desktop.modules.Almacenes.api_worker import ApiWorker
 
 
 class ReportesController:
@@ -200,7 +200,7 @@ class ReportesController:
         self.reportes.chart_view_tendencia.setChart(chart)
 
     def regresar(self):
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.reportes.close()
 

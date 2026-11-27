@@ -2,8 +2,8 @@ import uuid
 from PyQt6.QtWidgets import QMessageBox, QInputDialog, QLineEdit, QTableWidgetItem
 from PyQt6.QtCore import Qt
 
-from modules.usuarios.usuarios_ui import UsuariosUI
-from modules.Almacenes.api_worker import ApiWorker
+from desktop.modules.usuarios.usuarios_ui import UsuariosUI
+from desktop.modules.Almacenes.api_worker import ApiWorker
 
 
 class UsuariosController:
@@ -202,7 +202,7 @@ class UsuariosController:
 
     def regresar(self):
         self.cleanup_workers()
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.ui.close()
 

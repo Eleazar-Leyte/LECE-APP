@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QPainterPath
 from PyQt6.QtCore import Qt, QSize
-from modules.ajustes.settings_manager import SettingsManager
+from desktop.modules.ajustes.settings_manager import SettingsManager
 
 
 class MainMenuUI(QMainWindow):

@@ -8,8 +8,8 @@ from PyQt6.QtWidgets import QMessageBox, QTableWidget, QTableWidgetItem, QListWi
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QObject
 from PyQt6.QtGui import QColor
 
-from modules.Montaje.montaje_ui import MontajeUI, ExportarDialog
-from modules.Almacenes.api_worker import ApiWorker
+from desktop.modules.Montaje.montaje_ui import MontajeUI, ExportarDialog
+from desktop.modules.Almacenes.api_worker import ApiWorker
 from TableManager import TableManager
 
 
@@ -465,7 +465,7 @@ class MontajeController:
     def regresar(self):
         """Regresa al menú principal"""
         self.cleanup_workers()
-        from modules.menu_admin import MenuAdmin
+        from desktop.modules.menu_admin import MenuAdmin
         self.menuadmin = MenuAdmin(self.usuario_actual)
         self.montaje.close()
 
