@@ -1,103 +1,160 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Security
+import bcrypt
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt, JWTError
+from typing import List, Optional
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
-from typing import List
 
-from db.models.user import User
+from .auth import current_user
 from db.database_Manager import DatabaseManager
 
-router = APIRouter(prefix="/users",
-                   tags=["users"],
-                   responses={status.HTTP_404_NOT_FOUND: {
-                       "message": "No encontrado"}}
-                   )
-db_manager = DatabaseManager('Personal')
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+router = APIRouter(
+    prefix="/users",
+    tags=["users"]
+)
 
 
-# Obtener todos los usuarios
-def get_all_users():
-    query = "SELECT * FROM usuarios"
-    return db_manager.execute_query(query)
+class UserCreate(BaseModel):
+    nombre: str
+    usuario: str
+    password: str
+    rol: str
+    id_area: Optional[int] = None
+    id_personal_admin: Optional[int] = None
+    id_personal_operativo: Optional[int] = None
 
 
-# Obtener usuario por username
-def get_user_by_username(username: str):
-    return db_manager.get_user(username)
+class ResetPasswordRequest(BaseModel):
+    nueva_password: str
 
 
-# Crear usuario
-@router.post("/", response_model=User)
-async def create_user(user: User):
-    query = """
-        INSERT INTO usuarios (usuario, password, rol, estado, id_area)
-        VALUES (%s, %s, %s, %s, %s) RETURNING *
-    """
-    params = (user.usuario, user.password, user.rol, user.estado, user.id_area)
-    result = db_manager.execute_query(query, params)
-    if not result:
-        raise HTTPException(
-            status_code=400, detail="No se pudo crear el usuario")
-    return result[0]
-
-
-# Listar todos los usuarios
-@router.get("/", response_model=List[User])
-async def list_users():
-    users = get_all_users()
-    return users
-
-
-# Obtener usuario por nombre de usuario
-@router.get("/{username}", response_model=User)
-async def get_user(username: str):
-    user = get_user_by_username(username)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return user
-
-
-# Actualizar usuario
-@router.put("/{username}", response_model=User)
-async def update_user(username: str, user: User):
-    query = """
-        UPDATE usuarios SET password=%s, rol=%s, estado=%s, id_area=%s WHERE usuario=%s RETURNING *
-    """
-    params = (user.password, user.rol, user.estado, user.id_area, username)
-    result = db_manager.execute_query(query, params)
-    if not result:
-        raise HTTPException(
-            status_code=404, detail="Usuario no encontrado para actualizar")
-    return result[0]
-
-
-# Eliminar usuario
-@router.delete("/{username}")
-async def delete_user(username: str):
-    query = "DELETE FROM usuarios WHERE usuario=%s RETURNING *"
-    params = (username,)
-    result = db_manager.execute_query(query, params)
-    if not result:
-        raise HTTPException(
-            status_code=404, detail="Usuario no encontrado para eliminar")
-    return {"detail": "Usuario eliminado"}
-
-
-# Endpoint protegido para obtener el usuario actual
-@router.get("/me", response_model=User)
-async def get_me(token: str = Security(oauth2_scheme)):
+@router.get("/")
+async def listar_usuarios(user: dict = Depends(current_user)):
+    """Lista todos los usuarios registrados."""
+    db = None
     try:
-        payload = jwt.decode(
-            token, "3923c28b3ade829521125680bf68e946e763db30f9126471f1076874757a2381", algorithms=["HS256"])
-        username: str = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Token inválido")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Token inválido")
-    user = get_user_by_username(username)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return user
+        db = DatabaseManager('Personal')
+        query = """
+            SELECT u.id, u.nombre, u.usuario, u.rol, u.estado, a."Nombre del Área" as area
+            FROM usuarios u
+            LEFT JOIN areas a ON u.id_area = a.id
+            ORDER BY u.nombre
+        """
+        return db.execute_query(query)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if db:
+            db.close()
+
+
+@router.get("/personal_disponible")
+async def personal_sin_cuenta(user: dict = Depends(current_user)):
+    """Obtiene el personal que aún no tiene un usuario asignado."""
+    db = None
+    try:
+        db = DatabaseManager('Personal')
+
+        # Buscar personal administrativo sin cuenta
+        q_admin = """
+            SELECT id, "Nombre (s)" as nombre, "Apellido Paterno" as apellido, 'Admin/Directivo' as tipo, id_area
+            FROM personal_admin
+            WHERE id NOT IN (SELECT id_personal_admin FROM usuarios WHERE id_personal_admin IS NOT NULL)
+        """
+        admins = db.execute_query(q_admin)
+
+        # Buscar personal operativo sin cuenta
+        q_op = """
+            SELECT id, "Nombre (s)" as nombre, "Apellido Paterno" as apellido, 'Operativo' as tipo, id_area
+            FROM personal_o
+            WHERE id NOT IN (SELECT id_personal_operativo FROM usuarios WHERE id_personal_operativo IS NOT NULL)
+        """
+        operativos = db.execute_query(q_op)
+
+        return {"admins": admins, "operativos": operativos}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if db:
+            db.close()
+
+
+@router.post("/", status_code=201)
+async def crear_usuario(usr: UserCreate, user: dict = Depends(current_user)):
+    """Crea un nuevo usuario en el sistema."""
+    db = None
+    try:
+        db = DatabaseManager('Personal')
+
+        # Verificar que el nombre de usuario no exista
+        check = db.execute_query(
+            "SELECT id FROM usuarios WHERE usuario = %s", (usr.usuario,))
+        if check:
+            raise HTTPException(
+                status_code=400, detail="El nombre de usuario ya está registrado.")
+
+        # --- NUEVO MÉTODO DE ENCRIPTACIÓN ---
+        password_bytes = usr.password.encode('utf-8')
+        salt = bcrypt.gensalt()
+        hashed_pw = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
+        # ------------------------------------
+
+        query = """
+            INSERT INTO usuarios (nombre, usuario, "contraseña", rol, id_personal_admin, id_personal_operativo, id_area)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        params = (usr.nombre, usr.usuario, hashed_pw, usr.rol,
+                  usr.id_personal_admin, usr.id_personal_operativo, usr.id_area)
+
+        with db.get_cursor('Personal') as cursor:
+            cursor.execute(query, params)
+
+        return {"message": "Usuario creado exitosamente"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if db:
+            db.close()
+
+
+@router.put("/{id_usuario}/reset-password")
+async def resetear_password(id_usuario: int, req: ResetPasswordRequest, user: dict = Depends(current_user)):
+    """Permite al administrador resetear la contraseña de un usuario."""
+    db = None
+    try:
+        db = DatabaseManager('Personal')
+
+        # --- NUEVO MÉTODO DE ENCRIPTACIÓN ---
+        password_bytes = req.nueva_password.encode('utf-8')
+        salt = bcrypt.gensalt()
+        hashed_pw = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
+        # ------------------------------------
+
+        with db.get_cursor('Personal') as cursor:
+            cursor.execute(
+                'UPDATE usuarios SET "contraseña" = %s WHERE id = %s', (hashed_pw, id_usuario))
+
+        return {"message": "Contraseña actualizada correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if db:
+            db.close()
+
+
+@router.put("/{id_usuario}/toggle-status")
+async def cambiar_estado(id_usuario: int, user: dict = Depends(current_user)):
+    """Activa o desactiva el acceso de un usuario."""
+    db = None
+    try:
+        db = DatabaseManager('Personal')
+        with db.get_cursor('Personal') as cursor:
+            cursor.execute(
+                "UPDATE usuarios SET estado = NOT estado WHERE id = %s", (id_usuario,))
+        return {"message": "Estado del usuario modificado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if db:
+            db.close()

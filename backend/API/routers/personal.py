@@ -274,3 +274,58 @@ async def importar_personal_excel(
     finally:
         if db_manager is not None:
             db_manager.close()
+
+
+class AdminBase(BaseModel):
+    apellido_paterno: str
+    apellido_materno: str
+    nombre: str
+    id_puesto: int
+    id_area: int
+    correo: str
+    telefono: Optional[str] = None
+    extension: Optional[str] = None
+    direccion: Optional[str] = None
+
+
+@router.get("/admin")
+async def listar_admin(area_id: Optional[int] = None, user: dict = Depends(current_user)):
+    db = DatabaseManager('Personal')
+    try:
+        query = '''
+            SELECT id, "Apellido Paterno" as apellido_paterno, "Apellido Materno" as apellido_materno,
+                   "Nombre (s)" as nombre, "Correo Electrónico" as correo, "Teléfono" as telefono,
+                   "Extensión" as extension, "Dirección" as direccion, id_area, id_puesto
+            FROM personal_admin
+        '''
+        params = []
+        if area_id:
+            query += " WHERE id_area = %s"
+            params.append(area_id)
+
+        resultados = db.execute_query(query, tuple(params))
+        return resultados
+    finally:
+        db.close()
+
+
+@router.post("/admin")
+async def crear_admin(admin: AdminBase, user: dict = Depends(current_user)):
+    db = DatabaseManager('Personal')
+    try:
+        query = '''
+            INSERT INTO personal_admin 
+            ("Apellido Paterno", "Apellido Materno", "Nombre (s)", id_puesto, id_area, "Correo Electrónico", "Teléfono", "Extensión", "Dirección")
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        params = (
+            admin.apellido_paterno, admin.apellido_materno, admin.nombre, admin.id_puesto,
+            admin.id_area, admin.correo, admin.telefono, admin.extension, admin.direccion
+        )
+        with db.get_cursor('Personal') as cursor:
+            cursor.execute(query, params)
+        return {"message": "Personal administrativo registrado correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()

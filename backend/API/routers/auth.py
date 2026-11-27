@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -7,10 +9,11 @@ from datetime import datetime, timedelta
 import bcrypt
 from db.database_Manager import DatabaseManager
 
+load_dotenv()
 
-ALGORITHM = "HS256"
-ACCESS_TOKEN_DURATION = 30
-SECRET = "3923c28b3ade829521125680bf68e946e763db30f9126471f1076874757a2381"
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_DURATION = int(os.getenv("ACCESS_TOKEN_DURATION", 60))
+SECRET = os.getenv("SECRET", "clave_secreta_por_defecto")
 
 router = APIRouter(prefix="/login",
                    tags=["login"],
