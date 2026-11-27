@@ -6,6 +6,8 @@ from modules.Produccion.produccion_controler import ProduccionController
 from modules.Montaje.montaje_controlador import MontajeController
 from modules.reportes.reportes import ReportesController
 from modules.ajustes.ajustes import AjustesController
+from modules.usuarios.usuarios import UsuariosController
+from modules.A_P_Administrativo.personal_admin import PersonalAdminController
 
 
 class MenuAdmin(QObject):
@@ -60,6 +62,8 @@ class MenuAdmin(QObject):
         base_items = [
             {"id": "personal", "icon": "👷", "title": "Personal",
              "desc": "Gestión del personal operativo", "roles": ["Admin", "Personal Administrativo"]},
+            {"id": "personal_admin", "icon": "💼", "title": "Personal Administrativo",
+             "desc": "Gestión de oficinas y supervisores", "roles": ["Admin"]},
             {"id": "almacen", "icon": "📦", "title": "Almacén",
              "desc": "Gestión de inventario y materiales", "roles": ["Admin", "Personal Técnico"]},
             {"id": "produccion", "icon": "🏭", "title": "Producción",
@@ -69,7 +73,9 @@ class MenuAdmin(QObject):
             {"id": "reportes", "icon": "📊", "title": "Reportes",
              "desc": "Generar análisis detallados", "roles": ["Admin", "Personal Administrativo"]},
             {"id": "config", "icon": "⚙️", "title": "Configuración",
-             "desc": "Ajustes del sistema", "roles": ["Admin"]}
+             "desc": "Ajustes del sistema", "roles": ["Admin"]},
+            {"id": "users", "icon": "👤", "title": "Usuarios",
+             "desc": "Ajustes del usuarios", "roles": ["Admin"]}
         ]
 
         # Filtrar por rol del usuario actual
@@ -82,6 +88,8 @@ class MenuAdmin(QObject):
 
         if menu_id == "personal":
             self.win = Personal(self.usuario_actual)
+        elif menu_id == "personal_admin":
+            self.win = PersonalAdminController(self.usuario_actual)
         elif menu_id == "almacen":
             self.win = AlmacenController(self.usuario_actual)
         elif menu_id == "produccion":
@@ -92,6 +100,8 @@ class MenuAdmin(QObject):
             self.win = ReportesController(self.usuario_actual)
         elif menu_id == "config":
             self.win = AjustesController(self.usuario_actual)
+        elif menu_id == "users":
+            self.win = UsuariosController(self.usuario_actual)
 
     def logout(self):
         """Cierra sesión y vuelve al login"""
